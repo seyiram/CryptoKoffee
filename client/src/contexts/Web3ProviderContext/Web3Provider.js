@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import CryptoKoffeeContract from "./contracts/CryptoKoffee.json";
+import CryptoKoffeeContract from "../../contracts/CryptoKoffee.json";
 import getWeb3 from "./getWeb3";
 
-// import "./App.css";
+
 
 const Web3Provider = () => {
   const [walletInfo, setWalletInfo] = useState({name: "", link: "", walletAddress: "", walletBalance: "", numOfDonations: ""})
@@ -17,7 +17,7 @@ const Web3Provider = () => {
   }, []);
 
   useEffect(() => {
-    runExample()
+    runExample();
   }, [contract]);
 
   const connectToProvider = async () => {

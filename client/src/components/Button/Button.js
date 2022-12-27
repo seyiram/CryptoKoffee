@@ -1,15 +1,9 @@
-import React from 'react';
+import React from 'react'
 
 const Button = (props) => {
     return (
-        <div>
-        <button 
-            className="btn btn-primary" 
-            onClick={props.onClick}>
-            {props.label}
-        </button>
-        </div>
-    );
+        <button className='bg-cryptokoffee text-white py-2 px-6 rounded-3xl md:ml-8 hover:bg-cryptokoffee-400 duration-500'><a href="/#">{props.children}</a></button>
+    )
 }
 
-export default Button;
+export default Button
