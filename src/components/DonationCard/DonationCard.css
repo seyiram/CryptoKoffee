@@ -1,0 +1,83 @@
+.donation-card {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.donation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.donation-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #2c3e50;
+}
+
+.month-dropdown {
+  display: flex;
+  align-items: center;
+}
+
+.calendar-icon {
+  margin-right: 8px;
+  color: #7f8c8d;
+}
+
+.month-dropdown select {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px 10px;
+  background-color: #fff;
+  font-size: 14px;
+}
+
+.donation-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.donation-today,
+.donation-week,
+.donation-month {
+  text-align: center;
+}
+
+.amount {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.label {
+  font-size: 14px;
+  color: #7f8c8d;
+  margin-top: 5px;
+}
+
+.percentage {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #2ecc71;
+  background-color: #ecf0f1;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.donation-chart {
+  margin-top: 20px;
+  height: 300px;
+}
+
+.custom-tooltip {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 4px;
+}
