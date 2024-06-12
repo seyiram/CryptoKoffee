@@ -1,0 +1,275 @@
+.donation-page {
+  background-color: #f4f6f9;
+  padding: 20px;
+  font-family: "GT Walsheim Pro", sans-serif;
+}
+
+.donation-link-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.donation-link {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.donation-link h2 {
+  margin-bottom: 20px;
+}
+
+.donation-link .donation-label {
+  margin-top: 1.5rem;
+  font-size: 1rem;
+  color: #191e28;
+}
+
+.donation-link .input-group {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.donation-link .input-group input {
+  padding: 0.75rem;
+  margin-right: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 42%;
+  margin-top: 0.5rem;
+}
+
+.donation-link .input-group input:focus {
+  outline: none;
+  border-color: #f79e61;
+}
+
+.donation-link .copy-icon {
+  position: absolute;
+  right: 59%;
+  cursor: pointer;
+}
+
+.donation-link .copy-icon:hover,
+.donation-link .copy-icon:focus {
+  color: #f79e61;
+}
+
+.visit-page-btn,
+.save-btn {
+  padding: 0.75rem 1.25rem;
+  margin-left: 10px;
+  background-color: #000;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.2s ease,
+    background-color 0.2s ease, color 0.2s ease;
+}
+
+.visit-page-btn:hover,
+.save-btn:hover {
+  background-color: #f79e61;
+  box-shadow: 0.25rem 0.25rem 0rem #000;
+  transform: translate(-0.25rem, -0.25rem);
+}
+.visit-page-btn {
+  margin-top: 0.5rem;
+}
+
+.divider {
+  border: 1px solid #eee;
+  margin-top: 3rem;
+}
+
+.lower-section {
+  display: flex;
+  gap: 20px;
+}
+
+.customization-section,
+.page-preview {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.customization-section {
+  flex: 2;
+  margin-right: 10px;
+}
+
+.page-preview {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.customization-section h2 {
+  margin-bottom: 10px;
+}
+
+.customization-section .input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.customization-section input,
+.customization-section textarea {
+  padding: 0.75rem;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 90%;
+}
+
+.customization-section input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #f79e61;
+}
+
+.profile-picture-upload {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.upload-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.upload-card .profile-picture-icon {
+  color: #191e28;
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.upload-text {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+
+.click-to-upload {
+  color: #f79e61;
+}
+
+.or-drag-and-drop {
+  color: #191e28;
+}
+
+.upload-instructions {
+  color: #999;
+  font-size: 12px;
+}
+
+.hidden-input {
+  display: none;
+}
+
+.cancel-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  background-color: #ccc;
+}
+
+.cancel-btn:hover {
+  background-color: #f00;
+  color: #fff;
+}
+
+.page-preview h2 {
+  margin-bottom: 10px;
+}
+
+.preview-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  gap: 1rem;
+}
+
+.preview-card img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.social-icons-preview {
+  display: flex;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.social-icons-preview a {
+  color: #191e28;
+  font-size: 24px;
+  transition: color 0.2s;
+}
+
+.social-icons-preview a:hover {
+  color: #f79e61;
+}
+
+/* Media Queries for mobile responsiveness */
+@media (max-width: 768px) {
+  .donation-link .input-group {
+    flex-direction: column;
+  }
+
+  .donation-link .input-group input {
+    width: 100%;
+  }
+
+  .donation-link .copy-icon {
+    right: 2%;
+    top: 20%;
+  }
+
+  .visit-page-btn {
+    margin-top: 1rem;
+  }
+
+  .lower-section {
+    flex-direction: column;
+  }
+
+  .customization-section,
+  .page-preview {
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
+
+  .customization-section input,
+  .customization-section textarea {
+    width: 100%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .donation-page {
+    margin-top: 4rem;
+  }
+}

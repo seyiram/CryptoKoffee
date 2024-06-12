@@ -5,23 +5,28 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .donation-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .donation-header h3 {
   margin: 0;
   font-size: 16px;
   color: #2c3e50;
+  flex: 1;
+  min-width: 150px;
 }
 
 .month-dropdown {
   display: flex;
   align-items: center;
+  margin-top: 10px;
 }
 
 .calendar-icon {
@@ -41,12 +46,16 @@
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
+  flex-wrap: wrap;
 }
 
 .donation-today,
 .donation-week,
 .donation-month {
   text-align: center;
+  flex: 1;
+  min-width: 150px;
+  margin-bottom: 10px;
 }
 
 .amount {
@@ -80,4 +89,44 @@
   border: 1px solid #ccc;
   padding: 10px;
   border-radius: 4px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .donation-header,
+  .donation-stats {
+    flex-direction: column;
+  }
+
+  .donation-stats div {
+    margin-bottom: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .donation-header h3 {
+    font-size: 14px;
+  }
+
+  .month-dropdown select {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+
+  .amount {
+    font-size: 20px;
+  }
+
+  .label {
+    font-size: 12px;
+  }
+
+  .percentage {
+    font-size: 12px;
+    padding: 2px 4px;
+  }
+
+  .donation-chart {
+    height: 200px;
+  }
 }

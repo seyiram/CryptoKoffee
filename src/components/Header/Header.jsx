@@ -11,8 +11,8 @@ const Header = () => {
       </div>
       <div className="header-right">
         <FaBell className="header-icon" />
-        <div className="header-profile">
-          <img src="/path-to-profile-picture.jpg" alt="Profile" className="profile-pic" />
+        <div className="header-button">
+          <button className="connect-button">Connect your wallet</button>
         </div>
       </div>
     </header>

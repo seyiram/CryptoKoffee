@@ -1,21 +1,22 @@
 import React from 'react';
 import './ActivityCard.css';
+import Avatar from '../../assets/icons/Avatar';
 
 const activitiesToday = [
   {
-    avatar: '/path-to-avatar1.jpg', // Replace with actual image paths or URLs
+    avatar: <Avatar />, 
     description: 'Donated by $540.00',
     time: '5 minutes ago',
-    type: 'donation', // Add type to differentiate activity types
+    type: 'donation', 
   },
   {
-    avatar: '/path-to-avatar2.jpg',
+    avatar: <Avatar />,
     description: 'Another activity on an Important Item',
     time: '10 minutes ago',
     type: 'activity',
   },
   {
-    avatar: '/path-to-avatar3.jpg',
+    avatar: <Avatar />,
     description: 'Donated by $5000.00',
     time: '18 minutes ago',
     type: 'donation',
@@ -25,19 +26,19 @@ const activitiesToday = [
 
 const activitiesYesterday = [
   {
-    avatar: '/path-to-avatar4.jpg',
+    avatar: <Avatar />,
     description: 'Donated by $540.00',
     time: '5 minutes ago',
     type: 'donation',
   },
   {
-    avatar: '/path-to-avatar5.jpg',
+    avatar: <Avatar />,
     description: 'Another activity on an Important Item',
     time: '10 minutes ago',
     type: 'activity',
   },
   {
-    avatar: '/path-to-avatar6.jpg',
+    avatar: <Avatar />,
     description: 'Donated by $5000.00',
     time: '18 minutes ago',
     type: 'donation',
@@ -48,7 +49,11 @@ const activitiesYesterday = [
 const ActivityItem = ({ avatar, description, time, type }) => {
   return (
     <div className="activity-item">
-      <img src={avatar} alt="avatar" className="activity-avatar" />
+      {typeof avatar === 'string' ? (
+        <img src={avatar} alt="avatar" className="activity-avatar" />
+      ) : (
+        <div className="activity-avatar">{avatar}</div>
+      )}
       <div className="activity-details">
         <div className="activity-description">
           {description.includes('Important Item') ? (

@@ -1,0 +1,49 @@
+@font-face {
+  font-family: "GT Walsheim Pro";
+  src: url("./assets/fonts/GTWalsheimProRegular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "GT Walsheim Pro";
+  src: url("./assets/fonts/GTWalsheimProBold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+}
+
+body {
+  font-family: "GT Walsheim Pro", Arial, sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.bold {
+  font-weight: bold;
+}
+
+/* Global styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.app {
+  display: flex; /* This makes sure that Sidebar and main content are side by side */
+  height: 100vh; /* Full viewport height */
+}
+
+.main-content {
+  flex: 1; /* Takes remaining space after sidebar */
+  overflow-y: auto; /* If you want scrolling */
+}
