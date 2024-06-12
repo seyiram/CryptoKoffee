@@ -1,0 +1,41 @@
+type DonationEvent @entity(immutable: true) {
+  id: Bytes!
+  amount: BigInt! # uint256
+  donor: Bytes! # address
+  timeStamp: BigInt! # uint256
+  recipient: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OwnershipTransferred @entity(immutable: true) {
+  id: Bytes!
+  previousOwner: Bytes! # address
+  newOwner: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type PaymentEvent @entity(immutable: true) {
+  id: Bytes!
+  amount: BigInt! # uint256
+  timeStamp: BigInt! # uint256
+  sender: Bytes! # address
+  recipient: Bytes! # address
+  description: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type WalletInfoEvent @entity(immutable: true) {
+  id: Bytes!
+  walletAddress: Bytes! # address
+  currentWalletBalance: BigInt! # uint256
+  numOfDonations: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
