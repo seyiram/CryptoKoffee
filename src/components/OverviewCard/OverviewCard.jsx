@@ -11,13 +11,14 @@ import {
 import { FaCalendarAlt } from "react-icons/fa";
 import "./OverviewCard.css";
 import {
-  getBalance,
-  getDonationsThisWeek,
-  getDonationsThisMonth,
-  getDonationHistory,
+  initializeProvider,
+  getContract,
+  getWallet,
+  fetchDonationEventsForWallet,
+  fetchPaymentEvents,
 } from "../../utils/interact";
 
-const CustomTooltip = ({ active, payload, label }) => {
+const CustomTooltip = ({ active = false, payload = [], label = "" }) => {
   if (active && payload && payload.length) {
     return (
       <div className="custom-tooltip">
@@ -29,25 +30,106 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 const OverviewCard = () => {
-  const [balance, setBalance] = useState("0.00");
-  const [donationsThisWeek, setDonationsThisWeek] = useState("0.00");
-  const [donationsThisMonth, setDonationsThisMonth] = useState("0.00");
   const [donationHistory, setDonationHistory] = useState([]);
+  const [donationsThisWeek, setDonationsThisWeek] = useState(0);
+  const [donationsLastWeek, setDonationsLastWeek] = useState(0);
+  const [donationsThisMonth, setDonationsThisMonth] = useState(0);
+  const [donationsLastMonth, setDonationsLastMonth] = useState(0);
+  const [contract, setContract] = useState(null);
+  const [wallet, setWallet] = useState(null);
+  const [previousBalance, setPreviousBalance] = useState(0);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const balance = await getBalance();
-      const donationsThisWeek = await getDonationsThisWeek();
-      const donationsThisMonth = await getDonationsThisMonth();
-      const donationHistory = await getDonationHistory();
+    async function fetchData() {
+      await initializeProvider(); // Initialize provider and signer
 
-      setBalance(balance);
-      setDonationsThisWeek(donationsThisWeek);
-      setDonationsThisMonth(donationsThisMonth);
-      setDonationHistory(donationHistory);
-    };
-    fetchData();
+      const contractInstance = await getContract();
+      setContract(contractInstance);
+
+      const walletInfo = await getWallet();
+      setWallet(walletInfo);
+
+      // store previous balance
+      setPreviousBalance(walletInfo?.currentBalance || 0);
+    }
+
+    fetchData().catch(console.error);
   }, []);
+
+
+  
+  useEffect(() => {
+    const getData = async () => {
+      if (wallet?.walletAddress) {
+        fetchDonationEventsForWallet(wallet.walletAddress, (donations) => {
+          console.log("Donations here", donations);
+          setDonationHistory(donations);
+          if (donations.length > 0) {
+            processDonations(donations);
+          }
+        });
+      }
+    };
+
+    getData().catch(console.error);
+  }, [wallet?.walletAddress]);
+
+  const processDonations = (donations) => {
+    const now = new Date();
+    const oneWeekAgo = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() - 7
+    );
+    const oneMonthAgo = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      now.getDate()
+    );
+    const twoWeeksAgo = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() - 14
+    );
+    const twoMonthsAgo = new Date(
+      now.getFullYear(),
+      now.getMonth() - 2,
+      now.getDate()
+    );
+
+    const filterDonations = (start, end) =>
+      donations.filter((donation) => {
+        const donationDate = new Date(donation.timeStamp);
+        return donationDate >= start && donationDate < end;
+      });
+
+    const sumDonations = (donations) =>
+      donations.reduce((sum, donation) => sum + parseFloat(donation.amount), 0);
+
+    setDonationsThisWeek(sumDonations(filterDonations(oneWeekAgo, now)));
+    setDonationsLastWeek(
+      sumDonations(filterDonations(twoWeeksAgo, oneWeekAgo))
+    );
+    setDonationsThisMonth(sumDonations(filterDonations(oneMonthAgo, now)));
+    setDonationsLastMonth(
+      sumDonations(filterDonations(twoMonthsAgo, oneMonthAgo))
+    );
+  };
+
+  const calculatePercentageChange = (current, previous) => {
+    if (previous === 0) return current === 0 ? "0%" : "+100%";
+    const change = ((current - previous) / previous) * 100;
+    return `${change.toFixed(2)}%`;
+  };
+
+  console.log("donation history", donationHistory);
+
+  const currentBalanceChange = calculatePercentageChange(
+    wallet?.currentBalance || 0,
+    previousBalance
+  );
+
+  // console.log("wallet", wallet);
 
   return (
     <div className="donation-card">
@@ -60,34 +142,40 @@ const OverviewCard = () => {
             <option>January</option>
             <option>February</option>
             <option>March</option>
-            {/* Add more months as needed */}
           </select>
         </div>
       </div>
       <div className="donation-stats">
         <div className="donation-today">
-          <div className="amount">${parseFloat(balance).toLocaleString()}</div>
+          <div className="amount">
+            ${wallet ? wallet.currentBalance.toLocaleString() : "0.00"}
+          </div>
           <div className="label">Current Balance</div>
-          <div className="percentage">+31%</div>
+          <div className="percentage">{currentBalanceChange}</div>
         </div>
         <div className="donation-week">
-          <div className="amount">
-            ${parseFloat(donationsThisWeek).toLocaleString()}
-          </div>
+          <div className="amount">{donationsThisWeek}</div>
           <div className="label">Donated this week</div>
-          <div className="percentage">+20%</div>
+          <div className="percentage">
+            {calculatePercentageChange(donationsThisWeek, donationsLastWeek)}
+          </div>
         </div>
         <div className="donation-month">
-          <div className="amount">
-            ${parseFloat(donationsThisMonth).toLocaleString()}
-          </div>
+          <div className="amount">{donationsThisMonth}</div>
           <div className="label">Donated this month</div>
-          <div className="percentage">-16%</div>
+          <div className="percentage">
+            {calculatePercentageChange(donationsThisMonth, donationsLastMonth)}
+          </div>
         </div>
       </div>
       <div className="donation-chart">
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={donationHistory}>
+          <LineChart
+            data={donationHistory.map((event) => ({
+              name: new Date(event.timeStamp).toLocaleDateString(),
+              donation: parseFloat(event.amount),
+            }))}
+          >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />

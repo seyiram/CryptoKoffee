@@ -1,88 +1,100 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './ActivityCard.css';
+import { getWallet, fetchDonationEventsForWallet } from '../../utils/interact';
 import Avatar from '../../assets/icons/Avatar';
 
-const activitiesToday = [
-  {
-    avatar: <Avatar />, 
-    description: 'Donated by $540.00',
-    time: '5 minutes ago',
-    type: 'donation', 
-  },
-  {
-    avatar: <Avatar />,
-    description: 'Another activity on an Important Item',
-    time: '10 minutes ago',
-    type: 'activity',
-  },
-  {
-    avatar: <Avatar />,
-    description: 'Donated by $5000.00',
-    time: '18 minutes ago',
-    type: 'donation',
-  },
-  // Add more activities as needed
-];
+const ActivityCard = () => {
+  const [activities, setActivities] = useState({ today: [], yesterday: [], lastWeek: [] });
+  const [walletAddress, setWalletAddress] = useState(null);
 
-const activitiesYesterday = [
-  {
-    avatar: <Avatar />,
-    description: 'Donated by $540.00',
-    time: '5 minutes ago',
-    type: 'donation',
-  },
-  {
-    avatar: <Avatar />,
-    description: 'Another activity on an Important Item',
-    time: '10 minutes ago',
-    type: 'activity',
-  },
-  {
-    avatar: <Avatar />,
-    description: 'Donated by $5000.00',
-    time: '18 minutes ago',
-    type: 'donation',
-  },
-  // Add more activities as needed
-];
+  useEffect(() => {
+    const fetchData = async () => {
+      const walletInfo = await getWallet();
+      setWalletAddress(walletInfo.walletAddress);
+    };
 
-const ActivityItem = ({ avatar, description, time, type }) => {
-  return (
-    <div className="activity-item">
-      {typeof avatar === 'string' ? (
-        <img src={avatar} alt="avatar" className="activity-avatar" />
-      ) : (
+    fetchData().catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (walletAddress) {
+      fetchDonationEventsForWallet(walletAddress, (donations) => {
+        const processedActivities = processDonations(donations);
+        setActivities(processedActivities);
+      });
+    }
+  }, [walletAddress]);
+
+  const truncateAddress = (address) => {
+    if (!address) return "";
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const processDonations = (donations) => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const lastWeek = new Date(today);
+    lastWeek.setDate(lastWeek.getDate() - 7);
+
+    const todayActivities = [];
+    const yesterdayActivities = [];
+    const lastWeekActivities = [];
+
+    donations.forEach((donation) => {
+      const donationDate = new Date(donation.timeStamp);
+      const activity = {
+        avatar: <Avatar />,
+        description: `Donated by ${truncateAddress(donation.donor)}: ${donation.amount} ETH`,
+        time: donationDate.toLocaleTimeString(),
+        type: 'donation',
+      };
+
+      if (donationDate.toDateString() === today.toDateString() && todayActivities.length < 3) {
+        todayActivities.push(activity);
+      } else if (donationDate.toDateString() === yesterday.toDateString() && yesterdayActivities.length < 3) {
+        yesterdayActivities.push(activity);
+      } else if (donationDate >= lastWeek && lastWeekActivities.length < 3) {
+        lastWeekActivities.push(activity);
+      }
+    });
+
+    return { today: todayActivities, yesterday: yesterdayActivities, lastWeek: lastWeekActivities };
+  };
+
+  const ActivityItem = ({ avatar, description, time, type }) => {
+    return (
+      <div className="activity-item">
         <div className="activity-avatar">{avatar}</div>
-      )}
-      <div className="activity-details">
-        <div className="activity-description">
-          {description.includes('Important Item') ? (
-            <span className="important-item">{description}</span>
-          ) : (
-            description
-          )}
+        <div className="activity-details">
+          <div className="activity-description">
+            {description.includes('Important Item') ? (
+              <span className="important-item">{description}</span>
+            ) : (
+              description
+            )}
+          </div>
+          <div className="activity-time">{time}</div>
         </div>
-        <div className="activity-time">{time}</div>
       </div>
+    );
+  };
+
+  const ActivitySection = ({ title, activities }) => (
+    <div className="activity-section">
+      <div className="activity-marker">{title}</div>
+      {activities.map((activity, index) => (
+        <ActivityItem key={index} {...activity} />
+      ))}
     </div>
   );
-};
 
-const ActivitySection = ({ title, activities }) => (
-  <div className="activity-section">
-    <div className="activity-marker">{title}</div>
-    {activities.map((activity, index) => (
-      <ActivityItem key={index} {...activity} />
-    ))}
-  </div>
-);
-
-const ActivityCard = () => {
   return (
     <div className="activity-card">
       <h3>Recent Activities</h3>
-      <ActivitySection title="Today" activities={activitiesToday} />
-      <ActivitySection title="Yesterday" activities={activitiesYesterday} />
+      <ActivitySection title="Today" activities={activities.today} />
+      <ActivitySection title="Yesterday" activities={activities.yesterday} />
+      <ActivitySection title="Last Week" activities={activities.lastWeek} />
     </div>
   );
 };

@@ -1,32 +1,65 @@
-import React, { useEffect, useState } from 'react';
-import './PriceTracker.css';
+import React from 'react';
+import "./PriceTracker.css";
+import {
+  FaBitcoin,
+  FaEthereum,
+  FaCoins,
+  FaGem,
+  FaChartLine,
+  FaTruckLoading,
+} from "react-icons/fa";
+import { SiSolana, SiPolygon } from "react-icons/si";
+import { BsCurrencyBitcoin } from "react-icons/bs";
+import { useQuery } from '@tanstack/react-query';
 
-const PriceTracker = () => {
-  const [prices, setPrices] = useState({
-    bitcoin: null,
-    ethereum: null,
-    solana: null,
-    polygon: null,
-    binancecoin: null,
-    tron: null,
+const fetchPrices = async () => {
+  const apiKey = import.meta.env.VITE_COINMARKETCAP_API_KEY;
+  const symbols = "BTC,ETH,SOL,MATIC,BNB,TRX";
+  const convert = "USDT";
+
+  const url = `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=${symbols}&convert=${convert}`;
+
+  const response = await fetch(url, {
+    headers: {
+      "X-CMC_PRO_API_KEY": apiKey,
+    },
   });
 
-  useEffect(() => {
-    // Fetch cryptocurrency prices from an API
-    const fetchPrices = async () => {
-      const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,polygon,binancecoin,tron&vs_currencies=usd');
-      const data = await response.json();
-      setPrices({
-        bitcoin: data.bitcoin.usd,
-        ethereum: data.ethereum.usd,
-        solana: data.solana.usd,
-        polygon: data.polygon.usd,
-        binancecoin: data.binancecoin.usd,
-        tron: data.tron.usd,
-      });
-    };
-    fetchPrices();
-  }, []);
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+
+  return response.json();
+};
+
+const PriceTracker = () => {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['prices'],
+    queryFn: fetchPrices,
+    staleTime: 1000 * 60 * 60, // 1 hour
+    cacheTime: 1000 * 60 * 60 * 24, // 24 hours
+  });
+
+  const icons = {
+    bitcoin: <FaBitcoin />,
+    ethereum: <FaEthereum />,
+    solana: <SiSolana />,
+    polygon: <SiPolygon />,
+    binancecoin: <FaCoins />,
+    tron: <FaTruckLoading />,
+  };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
+  const prices = {
+    bitcoin: data.data.BTC.quote.USDT.price,
+    ethereum: data.data.ETH.quote.USDT.price,
+    solana: data.data.SOL.quote.USDT.price,
+    polygon: data.data.MATIC.quote.USDT.price,
+    binancecoin: data.data.BNB.quote.USDT.price,
+    tron: data.data.TRX.quote.USDT.price,
+  };
 
   return (
     <div className="price-tracker-card">
@@ -34,9 +67,14 @@ const PriceTracker = () => {
       <div className="price-list">
         {Object.keys(prices).map((crypto) => (
           <div key={crypto} className="price-item">
-            <span className="crypto-name">{crypto.charAt(0).toUpperCase() + crypto.slice(1)}</span>
+            <div className="crypto-details">
+              <span className="crypto-icon">{icons[crypto]}</span>
+              <span className="crypto-name">
+                {crypto.charAt(0).toUpperCase() + crypto.slice(1)}
+              </span>
+            </div>
             <span className="crypto-price">
-              {prices[crypto] ? `$${prices[crypto].toFixed(2)}` : 'Loading...'}
+              {prices[crypto] ? `$${prices[crypto].toFixed(2)}` : "Loading..."}
             </span>
           </div>
         ))}

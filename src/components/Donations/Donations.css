@@ -59,6 +59,12 @@
   border-radius: 8px;
 }
 
+.search-bar:focus,
+.search-bar:hover {
+  outline: none;
+  border-color: #f79e61;
+}
+
 .search-icon {
   position: absolute;
   top: 50%;

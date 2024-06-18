@@ -1,26 +1,66 @@
-import React from 'react';
-import './TopDonors.css';
-
-const donors = [
-  { name: 'Don Hernandez', amount: '$3,350.00', avatar: 'https://ui-avatars.com/api/?name=Don+Hernandez' },
-  { name: 'Martin Sherman', amount: '$2,010.00', avatar: 'https://ui-avatars.com/api/?name=Martin+Sherman' },
-  { name: 'Bradley Lawson', amount: '$1,800.00', avatar: 'https://ui-avatars.com/api/?name=Bradley+Lawson' },
-  { name: 'Jason Lawson', amount: '$1,210.00', avatar: 'https://ui-avatars.com/api/?name=Jason+Lawson' },
-  { name: 'Minerva Sherman', amount: '$960.00', avatar: 'https://ui-avatars.com/api/?name=Minerva+Sherman' },
-  { name: 'Henry Bennett', amount: '$800.00', avatar: 'https://ui-avatars.com/api/?name=Henry+Bennett' },
-];
+import React from "react";
+import "./TopDonors.css";
+import { getWallet, fetchDonationEventsForWallet } from "../../utils/interact";
 
 const TopDonors = () => {
+  const [donationHistory, setDonationHistory] = React.useState([]);
+  const [wallet, setWallet] = React.useState({});
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const walletInfo = await getWallet();
+      setWallet(walletInfo);
+      if (walletInfo?.walletAddress) {
+        fetchDonationEventsForWallet(walletInfo.walletAddress, (donations) => {
+          console.log("Donations here", donations);
+          setDonationHistory(donations);
+        });
+      }
+    };
+
+    fetchData().catch(console.error);
+  }, [wallet?.walletAddress]);
+
+  const truncateAddress = (address) => {
+    if (!address) return "";
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const generateAvatar = (address) => {
+    const initials = address.slice(0, 2).toUpperCase();
+    return `https://ui-avatars.com/api/?name=${initials}`;
+  };
+
+  const processDonations = (donations) => {
+    const donorMap = {};
+    donations.forEach((donation) => {
+      const donorAddress = donation.donor;
+      if (donorMap[donorAddress]) {
+        donorMap[donorAddress].amount = (parseFloat(donorMap[donorAddress].amount) + parseFloat(donation.amount)).toFixed(2);
+      } else {
+        donorMap[donorAddress] = {
+          address: donorAddress,
+          amount: parseFloat(donation.amount).toFixed(2),
+          avatar: generateAvatar(donorAddress),
+        };
+      }
+    });
+
+    return Object.values(donorMap).sort((a, b) => b.amount - a.amount).slice(0, 6);
+  };
+
+  const topDonors = processDonations(donationHistory);
+
   return (
     <div className="top-donors">
       <h3>Top Donors</h3>
       <ul className="donors-list">
-        {donors.map((donor, index) => (
+        {topDonors.map((donor, index) => (
           <li key={index} className="donor-item">
-            <img src={donor.avatar} alt={donor.name} className="donor-avatar" />
+            <img src={donor.avatar} alt={donor.address} className="donor-avatar" />
             <div className="donor-info">
-              <div className="donor-name">{donor.name}</div>
-              <div className="donor-amount">{donor.amount}</div>
+              <div className="donor-name">{truncateAddress(donor.address)}</div>
+              <div className="donor-amount">{donor.amount} ETH</div>
             </div>
           </li>
         ))}
