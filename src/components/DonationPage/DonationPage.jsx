@@ -56,7 +56,13 @@ const DonationPage = () => {
               onChange={(e) => setLink(e.target.value)}
             />
             <GoCopy onClick={copyToClipboard} className="icon copy-icon" />
-            <button className="visit-page-btn">Visit Page</button>
+            <button
+              className="visit-page-btn"
+              value={link}
+              onClick={() => window.open(link)}
+            >
+              Visit Page
+            </button>
           </div>
           <hr className="divider" />
         </div>

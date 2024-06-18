@@ -24,7 +24,7 @@ contract CryptoKoffee {
     mapping(address => Payment[]) public payments;
     mapping(address => WalletInfo) private walletMapping;
 
-    event DonationEvent(uint _amount, address donor, uint timeStamp);
+    event DonationEvent(uint amount, address indexed donor, uint indexed timeStamp, address indexed recipient);
     event WalletInfoEvent(address walletAddress, uint currentWalletBalance, uint numOfDonations);
     event PaymentEvent(uint amount, uint timeStamp, address sender, address recipient, string description);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
@@ -97,19 +97,12 @@ contract CryptoKoffee {
         uint donationAmount = msg.value - fee;
 
         totalBalance += donationAmount;
-        payments[donationAddress].push(Payment({
-            amount: donationAmount, 
-            timeStamp: block.timestamp, 
-            sender: msg.sender, 
-            recipient: donationAddress, 
-            description: "donation"
-        }));
 
         totalNumberOfDonations++;
         walletMapping[donationAddress].currentBalance += donationAmount;
         walletMapping[donationAddress].numOfDonations++;
 
-        emit DonationEvent(donationAmount, donationAddress, block.timestamp);
+        emit DonationEvent(donationAmount, msg.sender, block.timestamp, donationAddress);
         emit PaymentEvent(donationAmount, block.timestamp, msg.sender, donationAddress, "donation");
 
         (bool success, ) = owner.call{value: fee}("");
@@ -127,31 +120,5 @@ contract CryptoKoffee {
         (bool success, ) = _to.call{value: _amount}("");
         require(success, "Transfer failed.");
         emit PaymentEvent(_amount, block.timestamp, msg.sender, _to, "withdraw");
-    }
-
-    function getDonationsThisWeek() public view returns (uint) {
-        uint oneWeekAgo = block.timestamp - 1 weeks;
-        uint total = 0;
-        for (uint i = 0; i < payments[msg.sender].length; i++) {
-            if (payments[msg.sender][i].timeStamp >= oneWeekAgo) {
-                total += payments[msg.sender][i].amount;
-            }
-        }
-        return total;
-    }
-
-    function getDonationsThisMonth() public view returns (uint) {
-        uint oneMonthAgo = block.timestamp - 30 days;
-        uint total = 0;
-        for (uint i = 0; i < payments[msg.sender].length; i++) {
-            if (payments[msg.sender][i].timeStamp >= oneMonthAgo) {
-                total += payments[msg.sender][i].amount;
-            }
-        }
-        return total;
-    }
-
-    function getDonationHistory(address donationAddress) public view returns (Payment[] memory) {
-        return payments[donationAddress];
     }
 }

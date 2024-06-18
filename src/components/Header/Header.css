@@ -31,7 +31,8 @@
   align-items: center;
 }
 
-.connect-button {
+.connect-button,
+.create-wallet-button {
   background-color: #000;
   color: #fff;
   border: none;
@@ -44,7 +45,8 @@
     background-color 0.2s ease, color 0.2s ease;
 }
 
-.connect-button:hover {
+.connect-button:hover,
+.create-wallet-button:hover {
   background-color: #f79e61;
   box-shadow: 0.25rem 0.25rem 0rem #000;
   transform: translate(-0.25rem, -0.25rem);

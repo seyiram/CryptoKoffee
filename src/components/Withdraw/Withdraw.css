@@ -87,6 +87,12 @@
   align-items: center;
 }
 
+.withdraw-input .input-with-icon input:hover,
+.withdraw-input .input-with-icon input:focus {
+  outline: none;
+  border-color: #f79e61;
+}
+
 .withdraw-input .icon:hover {
   background-color: #ddd;
 }

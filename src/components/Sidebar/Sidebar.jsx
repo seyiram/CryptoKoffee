@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaHome, FaHeart, FaCog, FaBars, FaUser } from "react-icons/fa";
+import { FaHome, FaHeart, FaCog, FaBars, FaUser, FaSignOutAlt } from "react-icons/fa";
 import { FaSackDollar } from "react-icons/fa6";
 import { BiSolidDonateHeart } from "react-icons/bi";
 import { Link } from "react-router-dom";
@@ -11,6 +11,13 @@ const Sidebar = () => {
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleLogout = () => {
+    // Clear the connected account information (you can customize this as needed)
+    localStorage.removeItem("account");
+    // Refresh the page or redirect to the login page
+    window.location.reload();
   };
 
   return (
@@ -44,6 +51,10 @@ const Sidebar = () => {
             <FaCog className="sidebar-icon" />
             <span>Account Settings</span>
           </Link>
+          <span className="sidebar-item" onClick={handleLogout} tabIndex={0}>
+            <FaSignOutAlt className="sidebar-icon" />
+            <span>Logout</span>
+          </span>
         </div>
       </div>
 
@@ -51,9 +62,9 @@ const Sidebar = () => {
         <div className="mobile-header-logo">
           <img src={Logo} alt="Logo" />
         </div>
-        <div className="mobile-menu-icon" onClick={toggleMobileMenu}>
+        <button className="mobile-menu-icon" onClick={toggleMobileMenu}>
           <FaBars />
-        </div>
+        </button>
       </div>
 
       {isMobileMenuOpen && (
@@ -103,6 +114,10 @@ const Sidebar = () => {
             <FaCog className="mobile-menu-icon" />
             <span>Account Settings</span>
           </Link>
+          <div className="mobile-menu-item" onClick={handleLogout}>
+            <FaSignOutAlt className="mobile-menu-icon" />
+            <span>Logout</span>
+          </div>
         </div>
       )}
     </>

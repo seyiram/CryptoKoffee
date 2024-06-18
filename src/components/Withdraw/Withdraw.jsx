@@ -2,32 +2,56 @@ import React, { useState, useEffect } from 'react';
 import { FaBitcoin, FaEthereum } from 'react-icons/fa';
 import { GoPaste } from 'react-icons/go';
 import './Withdraw.css';
+import { withdrawFunds, getNetworkType, getWallet, fetchPaymentEventsForWallet } from '../../utils/interact';
+import { toast } from 'react-toastify';
 
 const Withdraw = () => {
   const [withdrawAddress, setWithdrawAddress] = useState('');
   const [amount, setAmount] = useState('');
-  const [selectedCoin, setSelectedCoin] = useState('BTC');
-
-  const handleWithdraw = () => {
-    // Handle the withdrawal logic here
-    console.log(`Withdrawing ${amount} to ${withdrawAddress}`);
-  };
-
-  // Sample withdrawal history data
-  const withdrawalHistory = [
-    { id: '0x234...231', date: 'June 6, 2022', time: '11:23 am EST', amount: '0.5 ETH' },
-    { id: '0x324...023', date: 'June 2, 2022', time: '4:45 pm EST', amount: '12.5 ETH' },
-    { id: '0x546...322', date: 'June 2, 2022', time: '12:25 pm EST', amount: '3.5 ETH' },
-    { id: '0x416...231', date: 'May 28, 2022', time: '3:22 pm EST', amount: '1.5 ETH' },
-    { id: '0x232...653', date: 'May 28, 2022', time: '6:42 pm EST', amount: '21 ETH' },
-  ];
+  const [selectedCoin, setSelectedCoin] = useState('ETH');
+  const [balance, setBalance] = useState('0.00');
+  const [withdrawalHistory, setWithdrawalHistory] = useState([]);
+  const [wallet, setWallet] = useState(null);
 
   useEffect(() => {
-    // Logic to detect network and set as selectedCoin
-    // This is a placeholder, replace it with actual network detection logic
-    const detectedNetwork = 'BTC'; // Replace this with actual network detection logic
-    setSelectedCoin(detectedNetwork);
-  }, []);
+    const fetchData = async () => {
+      const walletInfo = await getWallet();
+      setWallet(walletInfo);
+      if (walletInfo?.walletAddress) {
+        fetchPaymentEventsForWallet(walletInfo.walletAddress, (events) => {
+          console.log("Payment events here", events);
+          setWithdrawalHistory(events.filter(event => event.description === 'withdraw'));
+        });
+
+        // Set balance from walletInfo
+        setBalance(walletInfo.currentBalance);
+
+        const networkType = await getNetworkType(walletInfo.walletAddress);
+        setSelectedCoin(networkType);
+      }
+    };
+
+    fetchData().catch(console.error);
+  }, [wallet?.walletAddress]);
+
+  const handleWithdraw = async () => {
+    if (!withdrawAddress || !amount) {
+      toast.error('Please fill in all fields.');
+      return;
+    }
+    try {
+      await withdrawFunds(withdrawAddress, amount);
+      toast.success('Withdrawal successful!');
+      const walletInfo = await getWallet();
+      setBalance(walletInfo.currentBalance);
+      fetchPaymentEventsForWallet(walletInfo.walletAddress, (events) => {
+        setWithdrawalHistory(events.filter(event => event.description === 'withdraw'));
+      });
+    } catch (error) {
+      console.error('Withdrawal failed:', error);
+      toast.error('Withdrawal failed. Please try again.');
+    }
+  };
 
   const coinOptions = [
     { value: 'ETH', label: 'Ethereum', icon: <FaEthereum size={20} color="#3c3c3d" /> },
@@ -53,7 +77,7 @@ const Withdraw = () => {
         </div>
         <div className="withdraw-balance">
           <label>Total Balance:</label>
-          <span>0.0121285425 {selectedCoin}</span>
+          <span>{balance} {selectedCoin}</span>
         </div>
         <div className="withdraw-input">
           <label>Withdraw Address</label>
@@ -63,6 +87,7 @@ const Withdraw = () => {
               placeholder="Withdraw Address"
               value={withdrawAddress}
               onChange={(e) => setWithdrawAddress(e.target.value)}
+              required
             />
             <p className="icon" onClick={() => navigator.clipboard.readText().then(text => setWithdrawAddress(text))}>paste</p>
           </div>
@@ -75,6 +100,7 @@ const Withdraw = () => {
               placeholder="Amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
+              required
             />
           </div>
         </div>
