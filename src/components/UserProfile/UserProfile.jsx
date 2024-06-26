@@ -4,19 +4,25 @@ import { FaTwitter, FaSpotify, FaYoutube, FaDribbble } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { ethers } from "ethers";
 import { getUserProfile, getUserProfileByCustomUrl } from "../../utils/aws";
-import { getWallet, donate } from "../../utils/interact";
+import {
+  getWallet,
+  donate,
+  fetchDonationEventsForWallet,
+} from "../../utils/interact";
 import UserProfileSkeleton from "../../skeleton-loaders/UserProfileSkeleton";
 import CryptoKoffeeCup from "../../assets/cryptokoffee_cup.png";
 import { useNavigate, useParams } from "react-router-dom";
 import useExchangeRate from "../../hooks/useExchangeRate";
+import Avatar from "../../assets/icons/Avatar";
 
 const UserProfile = () => {
   const [profile, setProfile] = useState(null);
   const [walletInfo, setWalletInfo] = useState(null);
   const [cups, setCups] = useState(1);
   const [donationAmount, setDonationAmount] = useState(0.00002);
-  // const [exchangeRate, setExchangeRate] = useState(null);
   const [currentNetwork, setCurrentNetwork] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [donationEvents, setDonationEvents] = useState([]);
   const navigate = useNavigate();
   const { customUrl } = useParams();
 
@@ -36,32 +42,37 @@ const UserProfile = () => {
   }, []);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (customUrl) {
-        const prefixedCustomUrl = `https://cryptokoffee.co/donate/${customUrl}`;
+    const initializeProfile = async () => {
+      try {
+        const wallet = await getWallet();
+        setWalletInfo(wallet);
 
-        const userProfile = await getUserProfileByCustomUrl(prefixedCustomUrl);
+        if (customUrl) {
+          const prefixedCustomUrl = `https://cryptokoffee.co/donate/${customUrl}`;
+          const userProfile = await getUserProfileByCustomUrl(
+            prefixedCustomUrl
+          );
+          setProfile(userProfile || null);
+        } else if (wallet?.walletAddress) {
+          const userId = `user-${wallet.walletAddress}`;
+          const userProfile = await getUserProfile(userId);
+          setProfile(userProfile || null);
 
-        if (userProfile) {
-          setProfile(userProfile);
-        } else {
-          toast.error("User profile not found");
+          // console.log("wallet Address", walletInfo.walletAddress)
+          // Fetch donation events for the profile
+          fetchDonationEventsForWallet(wallet.walletAddress, (donations) => {
+            setDonationEvents(donations);
+          });
         }
-      } else if (walletInfo?.walletAddress) {
-        const userId = `user-${walletInfo.walletAddress}`;
-        const userProfile = await getUserProfile(userId);
-        if (userProfile) {
-          setProfile(userProfile);
-        } else {
-          toast.error("User profile not found");
-        }
-      } else {
-        toast.error("Wallet address not found");
+      } catch (error) {
+        toast.error("Error loading profile");
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (walletInfo) fetchProfile();
-  }, [customUrl, walletInfo]);
+    initializeProfile();
+  }, [customUrl]);
 
   useEffect(() => {
     const detectNetwork = async () => {
@@ -95,6 +106,10 @@ const UserProfile = () => {
     navigate("/donation-page");
   };
 
+  if (loading) {
+    return <UserProfileSkeleton />;
+  }
+
   if (!walletInfo?.walletAddress) {
     return (
       <div className="wallet-not-connected">
@@ -112,36 +127,6 @@ const UserProfile = () => {
       </div>
     );
   }
-
-  const recentSupporters = [
-    {
-      name: "Aron",
-      message:
-        "Hey, Julie your videos are such a big help for an up and coming cabinet maker/kitchen fitter like myself. Thanks for doing what you do.",
-      type: "member",
-      avatar: "https://via.placeholder.com/50",
-    },
-    {
-      name: "James",
-      message:
-        "Hey, your videos are such a big help for an up and coming cabinet maker/kitchen fitter like myself. Thanks for doing what you do.",
-      type: "donut",
-      count: 2,
-      avatar: "https://via.placeholder.com/50",
-    },
-    {
-      name: "Anie",
-      message: "",
-      type: "member",
-      avatar: "https://via.placeholder.com/50",
-    },
-    {
-      name: "Charlie",
-      message: "",
-      type: "member",
-      avatar: "https://via.placeholder.com/50",
-    },
-  ];
 
   const handleCupsChange = (event) => {
     setCups(parseInt(event.target.value, 10));
@@ -212,6 +197,11 @@ const UserProfile = () => {
       }
       console.error(error);
     }
+  };
+
+  const truncateAddress = (address) => {
+    if (!address) return "";
+    return `${address.slice(0, 11)}...${address.slice(-6)}`;
   };
 
   return (
@@ -305,19 +295,22 @@ const UserProfile = () => {
       </div>
       <div className="recent-supporters-container">
         <h2>Recent Supporters</h2>
-        {recentSupporters.map((supporter, index) => (
-          <div key={index} className="supporter-card">
-            <img
-              src={supporter.avatar}
-              alt={supporter.name}
-              className="supporter-avatar"
-            />
+        {donationEvents.map((supporter, index) => (
+          <div
+          key={`${supporter.donor}-${supporter.amount}`}
+            className="supporter-card"
+          >
+            <div className="supporter-avatar">
+              <Avatar />
+            </div>
             <div className="supporter-info">
               <p>
-                <strong>{supporter.name}</strong>{" "}
-                {supporter.type === "member"
-                  ? "is now a member."
-                  : `bought ${supporter.count} donuts.`}
+                <span className="tooltip">
+                  {truncateAddress(supporter.donor)}
+                  <span className="tooltiptext">{supporter.donor}</span>
+                </span>{" "}
+                donated{" "}
+                <span className="donation-amount">{supporter.amount}</span>
               </p>
               {supporter.message && (
                 <p className="supporter-message">{supporter.message}</p>
