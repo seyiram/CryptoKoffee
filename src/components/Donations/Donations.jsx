@@ -23,7 +23,6 @@ const DonationsPage = () => {
       setWallet(walletInfo);
       if (walletInfo?.walletAddress) {
         fetchDonationEventsForWallet(walletInfo.walletAddress, (donations) => {
-          console.log("Donations here", donations);
           setDonations(donations);
           setFilteredDonations(donations);
         });
@@ -100,7 +99,7 @@ const DonationsPage = () => {
           <div className="balance">
             <span>Balance</span>
             <span>
-              {balance} {network}
+              {Number(balance).toFixed(6)} {network}
             </span>
           </div>
         </div>

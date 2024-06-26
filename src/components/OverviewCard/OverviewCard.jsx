@@ -38,6 +38,7 @@ const OverviewCard = () => {
   const [contract, setContract] = useState(null);
   const [wallet, setWallet] = useState(null);
   const [previousBalance, setPreviousBalance] = useState(0);
+  const [noDonations, setNoDonations] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -56,18 +57,20 @@ const OverviewCard = () => {
     fetchData().catch(console.error);
   }, []);
 
-
-  
   useEffect(() => {
     const getData = async () => {
       if (wallet?.walletAddress) {
         fetchDonationEventsForWallet(wallet.walletAddress, (donations) => {
-          console.log("Donations here", donations);
           setDonationHistory(donations);
-          if (donations.length > 0) {
+          if (donations) {
             processDonations(donations);
+            setNoDonations(false);
+          } else {
+            setNoDonations(true);
           }
         });
+      } else {
+        setNoDonations(true);
       }
     };
 
@@ -122,14 +125,12 @@ const OverviewCard = () => {
     return `${change.toFixed(2)}%`;
   };
 
-  console.log("donation history", donationHistory);
+  // console.log("donation history", donationHistory);
 
   const currentBalanceChange = calculatePercentageChange(
     wallet?.currentBalance || 0,
     previousBalance
   );
-
-  // console.log("wallet", wallet);
 
   return (
     <div className="donation-card">
@@ -148,50 +149,55 @@ const OverviewCard = () => {
       <div className="donation-stats">
         <div className="donation-today">
           <div className="amount">
-            ${wallet ? wallet.currentBalance.toLocaleString() : "0.00"}
+            ${wallet ? Number(wallet?.currentBalance).toFixed(6) : "0.00"}
           </div>
           <div className="label">Current Balance</div>
           <div className="percentage">{currentBalanceChange}</div>
         </div>
         <div className="donation-week">
-          <div className="amount">{donationsThisWeek}</div>
+          <div className="amount">{Number(donationsThisWeek)?.toFixed(3)}</div>
           <div className="label">Donated this week</div>
           <div className="percentage">
             {calculatePercentageChange(donationsThisWeek, donationsLastWeek)}
           </div>
         </div>
         <div className="donation-month">
-          <div className="amount">{donationsThisMonth}</div>
+          <div className="amount">{Number(donationsThisMonth)?.toFixed(3)}</div>
           <div className="label">Donated this month</div>
           <div className="percentage">
             {calculatePercentageChange(donationsThisMonth, donationsLastMonth)}
           </div>
         </div>
       </div>
-      <div className="donation-chart">
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart
-            data={donationHistory.map((event) => ({
-              name: new Date(event.timeStamp).toLocaleDateString(),
-              donation: parseFloat(event.amount),
-            }))}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip
-              content={<CustomTooltip />}
-              cursor={{ stroke: "#f79e61", strokeWidth: 2 }}
-            />
-            <Line
-              type="monotone"
-              dataKey="donation"
-              stroke="#32CD32"
-              activeDot={{ r: 8 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+
+      {noDonations ? (
+        <p className="no-data-message">No donations data to display.</p>
+      ) : (
+        <div className="donation-chart">
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart
+              data={donationHistory.map((event) => ({
+                name: new Date(event.timeStamp).toLocaleDateString(),
+                donation: parseFloat(event.amount),
+              }))}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip
+                content={<CustomTooltip />}
+                cursor={{ stroke: "#f79e61", strokeWidth: 2 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="donation"
+                stroke="#32CD32"
+                activeDot={{ r: 8 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 };

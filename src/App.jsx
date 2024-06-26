@@ -8,8 +8,8 @@ import Settings from "./components/Settings/Settings";
 import Sidebar from "./components/Sidebar/Sidebar";
 import DonationPage from "./components/DonationPage/DonationPage";
 import UserProfile from "./components/UserProfile/UserProfile";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
@@ -22,6 +22,7 @@ function App() {
           <Route path="/withdraw" element={<Withdraw />} />
           <Route path="/donation-page" element={<DonationPage />} />
           <Route path="/profile" element={<UserProfile />} />
+          <Route path="/donate/:customUrl" element={<UserProfile />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </div>

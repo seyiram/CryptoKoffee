@@ -58,6 +58,10 @@
   cursor: pointer;
 }
 
+.icon-bars {
+  color: #000;
+}
+
 .mobile-menu {
   display: none;
   flex-direction: column;
@@ -103,6 +107,8 @@
   }
   .mobile-menu-icon {
     font-size: 20px;
+    border: none;
+    background: none;
   }
   .mobile-menu {
     display: flex;

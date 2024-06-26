@@ -5,6 +5,7 @@ import { getWallet, fetchDonationEventsForWallet } from "../../utils/interact";
 const TopDonors = () => {
   const [donationHistory, setDonationHistory] = React.useState([]);
   const [wallet, setWallet] = React.useState({});
+  const [noDonations, setNoDonations] = React.useState(false);
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -12,9 +13,15 @@ const TopDonors = () => {
       setWallet(walletInfo);
       if (walletInfo?.walletAddress) {
         fetchDonationEventsForWallet(walletInfo.walletAddress, (donations) => {
-          console.log("Donations here", donations);
+          // console.log("Donations here", donations);
           setDonationHistory(donations);
+
+          if (donations.length === 0) {
+            setNoDonations(true);
+          }
         });
+      } else {
+        setNoDonations(true);
       }
     };
 
@@ -36,7 +43,10 @@ const TopDonors = () => {
     donations.forEach((donation) => {
       const donorAddress = donation.donor;
       if (donorMap[donorAddress]) {
-        donorMap[donorAddress].amount = (parseFloat(donorMap[donorAddress].amount) + parseFloat(donation.amount)).toFixed(2);
+        donorMap[donorAddress].amount = (
+          parseFloat(donorMap[donorAddress].amount) +
+          parseFloat(donation.amount)
+        ).toFixed(2);
       } else {
         donorMap[donorAddress] = {
           address: donorAddress,
@@ -46,7 +56,9 @@ const TopDonors = () => {
       }
     });
 
-    return Object.values(donorMap).sort((a, b) => b.amount - a.amount).slice(0, 6);
+    return Object.values(donorMap)
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 6);
   };
 
   const topDonors = processDonations(donationHistory);
@@ -54,17 +66,27 @@ const TopDonors = () => {
   return (
     <div className="top-donors">
       <h3>Top Donors</h3>
-      <ul className="donors-list">
-        {topDonors.map((donor, index) => (
-          <li key={index} className="donor-item">
-            <img src={donor.avatar} alt={donor.address} className="donor-avatar" />
-            <div className="donor-info">
-              <div className="donor-name">{truncateAddress(donor.address)}</div>
-              <div className="donor-amount">{donor.amount} ETH</div>
-            </div>
-          </li>
-        ))}
-      </ul>
+      {noDonations ? (
+        <p className="no-data-message">No donors to display.</p>
+      ) : (
+        <ul className="donors-list">
+          {topDonors.map((donor, index) => (
+            <li key={index} className="donor-item">
+              <img
+                src={donor.avatar}
+                alt={donor.address}
+                className="donor-avatar"
+              />
+              <div className="donor-info">
+                <div className="donor-name">
+                  {truncateAddress(donor.address)}
+                </div>
+                <div className="donor-amount">{donor.amount} ETH</div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
