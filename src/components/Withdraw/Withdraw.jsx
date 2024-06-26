@@ -1,62 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import { FaBitcoin, FaEthereum } from 'react-icons/fa';
-import { GoPaste } from 'react-icons/go';
-import './Withdraw.css';
-import { withdrawFunds, getNetworkType, getWallet, fetchPaymentEventsForWallet } from '../../utils/interact';
-import { toast } from 'react-toastify';
+import React, { useState, useEffect } from "react";
+import { FaBitcoin, FaEthereum } from "react-icons/fa";
+import "./Withdraw.css";
+import {
+  withdrawFunds,
+  getNetworkType,
+  getWallet,
+  fetchPaymentEventsForWallet,
+} from "../../utils/interact";
+import { toast } from "react-toastify";
+import { getCoinCodeByChainId } from "../../utils/coinUtils";
 
 const Withdraw = () => {
-  const [withdrawAddress, setWithdrawAddress] = useState('');
-  const [amount, setAmount] = useState('');
-  const [selectedCoin, setSelectedCoin] = useState('ETH');
-  const [balance, setBalance] = useState('0.00');
+  const [withdrawAddress, setWithdrawAddress] = useState("");
+  const [amount, setAmount] = useState("");
+  const [selectedCoin, setSelectedCoin] = useState("ETH");
+  const [balance, setBalance] = useState("0.00");
   const [withdrawalHistory, setWithdrawalHistory] = useState([]);
   const [wallet, setWallet] = useState(null);
-
   useEffect(() => {
+    let isMounted = true; // flag to track if the component is mounted
+
     const fetchData = async () => {
       const walletInfo = await getWallet();
-      setWallet(walletInfo);
-      if (walletInfo?.walletAddress) {
-        fetchPaymentEventsForWallet(walletInfo.walletAddress, (events) => {
-          console.log("Payment events here", events);
-          setWithdrawalHistory(events.filter(event => event.description === 'withdraw'));
-        });
+      if (isMounted) {
+        // Check if the component is still mounted
+        setWallet(walletInfo);
+        if (walletInfo?.walletAddress) {
+          fetchPaymentEventsForWallet(walletInfo.walletAddress, (events) => {
+            console.log("Payment events here", events);
+            setWithdrawalHistory(
+              events.filter((event) => event.description === "withdraw")
+            );
+          });
 
-        // Set balance from walletInfo
-        setBalance(walletInfo.currentBalance);
+          // Set balance from walletInfo
+          setBalance(walletInfo.currentBalance);
 
-        const networkType = await getNetworkType(walletInfo.walletAddress);
-        setSelectedCoin(networkType);
+          const networkType = await getNetworkType(walletInfo.walletAddress);
+          const coinCode = getCoinCodeByChainId(networkType);
+          setSelectedCoin(coinCode);
+          console.log("Coin code here", coinCode);
+          console.log("Network type here", networkType, typeof networkType);
+          console.log("Selected coin", selectedCoin);
+        }
       }
     };
 
     fetchData().catch(console.error);
+
+    return () => {
+      isMounted = false; // Cleanup 
+    };
   }, [wallet?.walletAddress]);
 
   const handleWithdraw = async () => {
     if (!withdrawAddress || !amount) {
-      toast.error('Please fill in all fields.');
+      toast.error("Please fill in all fields.");
       return;
     }
     try {
       await withdrawFunds(withdrawAddress, amount);
-      toast.success('Withdrawal successful!');
+      toast.success("Withdrawal successful!");
       const walletInfo = await getWallet();
       setBalance(walletInfo.currentBalance);
       fetchPaymentEventsForWallet(walletInfo.walletAddress, (events) => {
-        setWithdrawalHistory(events.filter(event => event.description === 'withdraw'));
+        setWithdrawalHistory(
+          events.filter((event) => event.description === "withdraw")
+        );
       });
     } catch (error) {
-      console.error('Withdrawal failed:', error);
-      toast.error('Withdrawal failed. Please try again.');
+      console.error("Withdrawal failed:", error);
+      toast.error("Withdrawal failed. Please try again.");
     }
   };
 
   const coinOptions = [
-    { value: 'ETH', label: 'Ethereum', icon: <FaEthereum size={20} color="#3c3c3d" /> },
-    { value: 'OP', label: 'Optimism', icon: <FaBitcoin size={20} color="#f7931a" /> },
-    // Add more coins as needed
+    {
+      value: "ETH",
+      label: "Ethereum",
+      icon: <FaEthereum size={20} color="#3c3c3d" />,
+    },
+    {
+      value: "OP",
+      label: "Optimism",
+      icon: <FaBitcoin size={20} color="#f7931a" />,
+    },
+    {
+      value: "BNB",
+      label: "BNB",
+      icon: <FaBitcoin size={20} color="#f7931a" />,
+    },
+    { value: "BTC", label: "Bitcoin", icon: <FaBitcoin size={20} /> },
+    { value: "SOL", label: "Solana", icon: <FaBitcoin size={20} /> },
+    { value: "MATIC", label: "Polygon", icon: <FaBitcoin size={20} /> },
   ];
 
   return (
@@ -66,7 +102,10 @@ const Withdraw = () => {
         <div className="withdraw-coin">
           <label>Coin:</label>
           <div className="coin-selector">
-            <select value={selectedCoin} onChange={(e) => setSelectedCoin(e.target.value)}>
+            <select
+              value={selectedCoin}
+              onChange={(e) => setSelectedCoin(e.target.value)}
+            >
               {coinOptions.map((coin) => (
                 <option key={coin.value} value={coin.value}>
                   {coin.icon} {coin.label}
@@ -77,7 +116,9 @@ const Withdraw = () => {
         </div>
         <div className="withdraw-balance">
           <label>Total Balance:</label>
-          <span>{balance} {selectedCoin}</span>
+          <span>
+            {balance} {selectedCoin}
+          </span>
         </div>
         <div className="withdraw-input">
           <label>Withdraw Address</label>
@@ -89,7 +130,16 @@ const Withdraw = () => {
               onChange={(e) => setWithdrawAddress(e.target.value)}
               required
             />
-            <p className="icon" onClick={() => navigator.clipboard.readText().then(text => setWithdrawAddress(text))}>paste</p>
+            <p
+              className="icon"
+              onClick={() =>
+                navigator.clipboard
+                  .readText()
+                  .then((text) => setWithdrawAddress(text))
+              }
+            >
+              paste
+            </p>
           </div>
         </div>
         <div className="withdraw-input">
@@ -104,8 +154,10 @@ const Withdraw = () => {
             />
           </div>
         </div>
-        <button className="withdraw-button" onClick={handleWithdraw}>Proceed with withdrawal</button>
-        
+        <button className="withdraw-button" onClick={handleWithdraw}>
+          Proceed with withdrawal
+        </button>
+
         <div className="withdrawal-history">
           <h2>Withdrawal History</h2>
           <table>

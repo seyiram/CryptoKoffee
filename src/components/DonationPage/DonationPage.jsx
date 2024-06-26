@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useReducer, useEffect } from "react";
+import "./DonationPage.css";
 import { SlCloudUpload } from "react-icons/sl";
 import { GoCopy } from "react-icons/go";
 import {
@@ -8,39 +9,253 @@ import {
   FaGlobe,
   FaPatreon,
 } from "react-icons/fa";
-import "./DonationPage.css";
+import { useNavigate, useParams } from "react-router-dom";
+
+import { initialState, reducer } from "../../../state/donationPageState";
+import { toast } from "react-toastify";
+
+import { getWallet } from "../../utils/interact";
+import { S3, HeadObjectCommand } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
+import {
+  DynamoDBClient,
+  GetItemCommand,
+  PutItemCommand,
+} from "@aws-sdk/client-dynamodb";
+import { marshall } from "@aws-sdk/util-dynamodb";
+import { getUserProfile } from "../../utils/aws";
+
+const s3 = new S3({
+  region: import.meta.env.VITE_AWS_REGION,
+  credentials: {
+    accessKeyId: import.meta.env.VITE_AWS_S3_SECRET_ACCESS_KEY_ID,
+    secretAccessKey: import.meta.env.VITE_AWS_S3_SECRET_ACCESS_KEY,
+  },
+});
+
+const dynamodb = new DynamoDBClient({
+  region: import.meta.env.VITE_AWS_REGION,
+  credentials: {
+    accessKeyId: import.meta.env.VITE_AWS_S3_SECRET_ACCESS_KEY_ID,
+    secretAccessKey: import.meta.env.VITE_AWS_S3_SECRET_ACCESS_KEY,
+  },
+});
 
 const DonationPage = () => {
-  const [link, setLink] = useState("https://cryptokoffee.co/donate/");
-  const [displayName, setDisplayName] = useState("OxHearts");
-  const [bio, setBio] = useState("Best design agency in the world :)");
-  const [text, setText] = useState(
-    "Hello, viewer! I’m really glad you stopped by here. I will send part of the money raised through the cryptotip service to charity. Have a good day!"
-  );
-  const [profilePicture, setProfilePicture] = useState(null);
-  const [twitterLink, setTwitterLink] = useState(
-    "https://twitter.com/OxHearts"
-  );
-  const [instagramLink, setInstagramLink] = useState(
-    "https://www.instagram.com/oxhearts/"
-  );
-  const [youtubeLink, setYoutubeLink] = useState(
-    "https://www.youtube.com/channel/UC5yq6J2b7pCtG0yVp0fN5WQ"
-  );
-  const [websiteLink, setWebsiteLink] = useState("https://cryptokoffee.co");
-  const [patreonLink, setPatreonLink] = useState(
-    "https://www.patreon.com/oxhearts"
-  );
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const [walletAddress, setWalletAddress] = React.useState(null);
+  const navigate = useNavigate();
+  const { customUrl} = useParams();
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(link);
-    alert("Link copied to clipboard!");
+  console.log("Custom URL:", customUrl);
+
+  const fetchUserProfile = async () => {
+    const wallet = await getWallet();
+    setWalletAddress(wallet?.walletAddress);
+    if (walletAddress) {
+      const userId = `user-${walletAddress}`;
+      const profile = await getUserProfile(userId);
+      // console.log("User Profile:", profile);
+      if (profile) {
+        dispatch({
+          type: "SET_LINK",
+          payload: profile.custom_url || "",
+        });
+        dispatch({
+          type: "SET_DISPLAY_NAME",
+          payload: profile.username || "",
+        });
+        dispatch({ type: "SET_BIO", payload: profile.short_bio || "" });
+        dispatch({ type: "SET_TEXT", payload: profile.custom_message || "" });
+        dispatch({
+          type: "SET_PROFILE_PICTURE",
+          payload: profile.avatar || null,
+        });
+        dispatch({
+          type: "SET_TWITTER_LINK",
+          payload: profile.twitter_link || "",
+        });
+        dispatch({
+          type: "SET_INSTAGRAM_LINK",
+          payload: profile.instagram_link || "",
+        });
+        dispatch({
+          type: "SET_YOUTUBE_LINK",
+          payload: profile.youtube_link || "",
+        });
+        dispatch({
+          type: "SET_WEBSITE_LINK",
+          payload: profile.website_link || "",
+        });
+        dispatch({
+          type: "SET_PATREON_LINK",
+          payload: profile.patreon_link || "",
+        });
+      }
+    }
   };
 
-  const handleProfilePictureChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setProfilePicture(URL.createObjectURL(e.target.files[0]));
+  useEffect(() => {
+    fetchUserProfile();
+  }, [walletAddress]);
+
+  // const getUserProfile = async (userId) => {
+  //   const params = {
+  //     TableName: "UserProfiles",
+  //     Key: marshall({ user_id: userId }),
+  //   };
+
+  //   try {
+  //     const { Item } = await dynamodb.send(new GetItemCommand(params));
+  //     return Item ? unmarshall(Item) : null;
+  //   } catch (error) {
+  //     console.error("Error fetching user profile:", error);
+  //     return null;
+  //   }
+  // };
+
+  const checkIfFileExists = async (Key) => {
+    const params = {
+      Bucket: "cryptokoffee-avatars2",
+      Key,
+    };
+
+    try {
+      await s3.send(new HeadObjectCommand(params));
+      return true;
+    } catch (error) {
+      if (error.name === "NotFound") {
+        return false;
+      }
+      console.error("Error checking if file exists:", error);
+      return false;
     }
+  };
+
+  const uploadToS3 = async (file) => {
+    const Key = `profile-pictures/${Date.now()}-${file.name}`; // Unique file name
+
+    // Check if the file already exists
+    const fileExists = await checkIfFileExists(Key);
+    if (fileExists) {
+      toast.info("File already saved!");
+      return null;
+    }
+
+    const params = {
+      Bucket: "cryptokoffee-avatars2",
+      Key,
+      Body: file,
+      ContentType: file.type,
+    };
+
+    try {
+      const upload = new Upload({
+        client: s3,
+        params,
+      });
+
+      const { Location } = await upload.done();
+      return Location; // S3 URL
+    } catch (error) {
+      console.error("Error uploading to S3:", error);
+      return null;
+    }
+  };
+
+  const handleProfilePictureChange = async (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const maxSize = 1 * 1024 * 1024; // 1MB
+
+      // Check file size
+      if (file.size > maxSize) {
+        toast.error("File size should be 1MB or less.");
+        return;
+      }
+
+      // Create a temporary URL for the file
+      const imageUrl = URL.createObjectURL(file);
+
+      // Set the profile picture to the temporary URL
+      dispatch({ type: "SET_PROFILE_PICTURE", payload: imageUrl });
+
+      // Check aspect ratio
+      const img = new Image();
+      img.src = imageUrl;
+      img.onload = async () => {
+        if (img.width !== img.height) {
+          toast.error("Image must be 1:1 aspect ratio.");
+          // Reset the profile picture if the aspect ratio is invalid
+          dispatch({ type: "SET_PROFILE_PICTURE", payload: null });
+          return;
+        }
+
+        const s3Url = await uploadToS3(file);
+        if (s3Url) {
+          // Update the profile picture to the S3 URL after successful upload
+          dispatch({ type: "SET_PROFILE_PICTURE", payload: s3Url });
+        } else {
+          toast.error("Failed to upload image.");
+          // Reset the profile picture if the upload fails
+          dispatch({ type: "SET_PROFILE_PICTURE", payload: null });
+        }
+      };
+    }
+  };
+
+  const saveUserProfile = async () => {
+    if (!walletAddress) {
+      toast.error("Wallet not connected.");
+      return;
+    }
+
+    // Define user_id based on walletAddress
+    const user_id = `user-${walletAddress}`;
+
+    const userProfile = {
+      user_id: user_id, // Unique identifier
+      wallet_address: walletAddress,
+      custom_url: state.link,
+      username: state.displayName,
+      avatar: state.profilePicture, // S3 URL
+      short_bio: state.bio,
+      twitter_link: state.twitterLink,
+      instagram_link: state.instagramLink,
+      youtube_link: state.youtubeLink,
+      website_link: state.websiteLink,
+      patreon_link: state.patreonLink,
+      custom_message: state.text,
+    };
+
+    const params = {
+      TableName: "UserProfiles",
+      Item: marshall(userProfile),
+      ConditionExpression: "attribute_exists(wallet_address)",
+    };
+
+    try {
+      await dynamodb.send(new PutItemCommand(params));
+      toast.success("User profile updated successfully!");
+    } catch (error) {
+      if (error.name === "ConditionalCheckFailedException") {
+        // If the condition fails, it means the user profile does not exist, so we create it
+        const createParams = {
+          TableName: "UserProfiles",
+          Item: marshall(userProfile),
+        };
+        await dynamodb.send(new PutItemCommand(createParams));
+        toast.success("User profile created successfully!");
+      } else {
+        console.error("Error saving user profile:", error);
+        toast.error("Failed to save user profile.");
+      }
+    }
+  };
+
+  const handleVisitPage = () => {
+    const userId = `user-${walletAddress}`;
+    navigate(`/donate/${state.link.split("/").pop()}`);
   };
 
   return (
@@ -48,18 +263,24 @@ const DonationPage = () => {
       <div className="donation-link-container">
         <div className="donation-link">
           <h2>Donation Page</h2>
-          <span className="donation-label">Donation link to the page</span>
+          <span className="donation-label">Donation link (your page)</span>
           <div className="input-group">
             <input
               type="text"
-              value={link}
-              onChange={(e) => setLink(e.target.value)}
+              value={state.link}
+              onChange={(e) =>
+                dispatch({ type: "SET_LINK", payload: e.target.value })
+              }
+              placeholder="cryptokoffee.com/donate/0xAnonymous"
             />
-            <GoCopy onClick={copyToClipboard} className="icon copy-icon" />
+            <GoCopy
+              onClick={() => navigator.clipboard.writeText(state.link)}
+              className="icon copy-icon"
+            />
             <button
               className="visit-page-btn"
-              value={link}
-              onClick={() => window.open(link)}
+              value={state.link}
+              onClick={handleVisitPage}
             >
               Visit Page
             </button>
@@ -76,54 +297,75 @@ const DonationPage = () => {
           <div className="input-group">
             <input
               type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
+              value={state.displayName}
+              onChange={(e) =>
+                dispatch({ type: "SET_DISPLAY_NAME", payload: e.target.value })
+              }
               placeholder="Displayed name"
             />
             <input
               type="text"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
+              value={state.bio}
+              onChange={(e) =>
+                dispatch({ type: "SET_BIO", payload: e.target.value })
+              }
               placeholder="Short bio"
             />
             <input
               type="text"
-              value={twitterLink}
-              onChange={(e) => setTwitterLink(e.target.value)}
-              placeholder="Twitter link"
+              value={state.twitterLink}
+              onChange={(e) =>
+                dispatch({ type: "SET_TWITTER_LINK", payload: e.target.value })
+              }
+              placeholder="X link"  
             />
             <input
               type="text"
-              value={instagramLink}
-              onChange={(e) => setInstagramLink(e.target.value)}
+              value={state.instagramLink}
+              onChange={(e) =>
+                dispatch({
+                  type: "SET_INSTAGRAM_LINK",
+                  payload: e.target.value,
+                })
+              }
               placeholder="Instagram link"
             />
             <input
               type="text"
-              value={youtubeLink}
-              onChange={(e) => setYoutubeLink(e.target.value)}
+              value={state.youtubeLink}
+              onChange={(e) =>
+                dispatch({ type: "SET_YOUTUBE_LINK", payload: e.target.value })
+              }
               placeholder="YouTube link"
             />
             <input
               type="text"
-              value={websiteLink}
-              onChange={(e) => setWebsiteLink(e.target.value)}
+              value={state.websiteLink}
+              onChange={(e) =>
+                dispatch({ type: "SET_WEBSITE_LINK", payload: e.target.value })
+              }
               placeholder="Website link"
             />
             <input
               type="text"
-              value={patreonLink}
-              onChange={(e) => setPatreonLink(e.target.value)}
+              value={state.patreonLink}
+              onChange={(e) =>
+                dispatch({ type: "SET_PATREON_LINK", payload: e.target.value })
+              }
               placeholder="Patreon link"
             />
           </div>
           <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
+            value={state.text}
+            onChange={(e) =>
+              dispatch({ type: "SET_TEXT", payload: e.target.value })
+            }
             placeholder="Your custom message"
           />
           <div className="profile-picture-upload">
-            {profilePicture && <img src={profilePicture} alt="Profile" />}
+            {state.profilePicture && (
+              <img src={state.profilePicture} alt="Profile" />
+            )}
             <label htmlFor="profile-picture" className="upload-card">
               <SlCloudUpload className="icon profile-picture-icon" />
               <div className="upload-text">
@@ -131,7 +373,7 @@ const DonationPage = () => {
                 <span className="or-drag-and-drop">or drag and drop</span>
               </div>
               <div className="upload-instructions">
-                JPG, JPEG or PNG (1:1, max size 2MB)
+                JPG, JPEG or PNG (1:1, max size 1MB)
               </div>
             </label>
             <input
@@ -140,44 +382,68 @@ const DonationPage = () => {
               className="hidden-input"
               onChange={handleProfilePictureChange}
             />
-            <button className="cancel-btn">Cancel</button>
-            <button className="save-btn">Save changes</button>
+            <div className="donation-btn-group">
+              <button className="cancel-btn" onClick={() => navigate("/")}>
+                Cancel
+              </button>
+              <button className="save-btn" onClick={saveUserProfile}>
+                Save changes
+              </button>
+            </div>
           </div>
         </div>
         <div className="page-preview">
           <h2>Page Preview</h2>
           <div className="preview-card">
-            {profilePicture && <img src={profilePicture} alt="Profile" />}
-            <h3>{displayName}</h3>
-            <p>{bio}</p>
-            <p>{text}</p>
+            {state.profilePicture && (
+              <img src={state.profilePicture} alt="Profile" />
+            )}
+            <h3>{state.displayName}</h3>
+            <p>{state.bio}</p>
+            <p>{state.text}</p>
             <div className="social-icons-preview">
-              {twitterLink && (
-                <a href={twitterLink} target="_blank" rel="noopener noreferrer">
+              {state.twitterLink && (
+                <a
+                  href={state.twitterLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <FaTwitter />
                 </a>
               )}
-              {instagramLink && (
+              {state.instagramLink && (
                 <a
-                  href={instagramLink}
+                  href={state.instagramLink}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <FaInstagram />
                 </a>
               )}
-              {youtubeLink && (
-                <a href={youtubeLink} target="_blank" rel="noopener noreferrer">
+              {state.youtubeLink && (
+                <a
+                  href={state.youtubeLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <FaYoutube />
                 </a>
               )}
-              {websiteLink && (
-                <a href={websiteLink} target="_blank" rel="noopener noreferrer">
+              {state.websiteLink && (
+                <a
+                  href={state.websiteLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <FaGlobe />
                 </a>
               )}
-              {patreonLink && (
-                <a href={patreonLink} target="_blank" rel="noopener noreferrer">
+              {state.patreonLink && (
+                <a
+                  href={state.patreonLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <FaPatreon />
                 </a>
               )}

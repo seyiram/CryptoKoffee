@@ -1,0 +1,91 @@
+/* UserProfileSkeleton.css */
+.skeleton-container {
+    width: 60%;
+    margin: 20px auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .skeleton-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .skeleton-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: #e0e0e0;
+  }
+  
+  .skeleton-text {
+    width: 80%;
+    height: 20px;
+    background: #e0e0e0;
+    border-radius: 5px;
+  }
+  
+  .skeleton-name {
+    width: 60%;
+  }
+  
+  .skeleton-title {
+    width: 40%;
+  }
+  
+  .skeleton-support {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .skeleton-support-header {
+    width: 30%;
+    height: 20px;
+    background: #e0e0e0;
+    border-radius: 5px;
+  }
+  
+  .skeleton-support-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .skeleton-button {
+    width: 30%;
+    height: 40px;
+    background: #e0e0e0;
+    border-radius: 5px;
+  }
+  
+  .skeleton-recent-supporters {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .skeleton-recent-supporters-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .skeleton-avatar-small {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #e0e0e0;
+  }
+  
+  .skeleton-long-text {
+    width: 90%;
+  }
+  

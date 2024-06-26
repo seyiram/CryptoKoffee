@@ -229,6 +229,33 @@
   color: #666;
 }
 
+.wallet-not-connected, .profile-not-found {
+  margin-top: 5rem;
+  text-align: center;
+}
+
+.wallet-not-connected button,
+.profile-not-found button {
+  margin-top: 2rem;
+  padding: 0.625rem 1.25rem;
+  background-color: #000;
+  color: #fff;
+  border-radius: 0.313rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.2s ease,
+    background-color 0.2s ease, color 0.2s ease;
+  font-size: 1rem;
+  border: none;
+}
+
+.wallet-not-connected button:hover,
+.profile-not-found button:hover {
+  background-color: #f79e61;
+  box-shadow: 0.25rem 0.25rem 0rem #000;
+  transform: translate(-0.25rem, -0.25rem);
+  color: #000;
+}
+
 /* Mobile Styles */
 
 @media (max-width: 768px) {

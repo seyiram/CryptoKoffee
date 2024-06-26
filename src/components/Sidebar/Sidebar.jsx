@@ -14,9 +14,7 @@ const Sidebar = () => {
   };
 
   const handleLogout = () => {
-    // Clear the connected account information (you can customize this as needed)
     localStorage.removeItem("account");
-    // Refresh the page or redirect to the login page
     window.location.reload();
   };
 
@@ -63,7 +61,7 @@ const Sidebar = () => {
           <img src={Logo} alt="Logo" />
         </div>
         <button className="mobile-menu-icon" onClick={toggleMobileMenu}>
-          <FaBars />
+          <FaBars className="icon-bars" />
         </button>
       </div>
 
@@ -73,44 +71,23 @@ const Sidebar = () => {
             <FaHome className="mobile-menu-icon" />
             <span>Dashboard</span>
           </Link>
-          <Link
-            to="/donations"
-            className="mobile-menu-item"
-            onClick={toggleMobileMenu}
-          >
+          <Link to="/donations" className="mobile-menu-item" onClick={toggleMobileMenu}>
             <FaHeart className="mobile-menu-icon" />
             <span>Donations</span>
           </Link>
-          <Link
-            to="/withdraw"
-            className="mobile-menu-item"
-            onClick={toggleMobileMenu}
-          >
-            <GiCash className="mobile-menu-icon" />
+          <Link to="/withdraw" className="mobile-menu-item" onClick={toggleMobileMenu}>
+            <FaSackDollar className="mobile-menu-icon" />
             <span>Withdraw</span>
           </Link>
-          <Link
-            to="/donation-page"
-            className="mobile-menu-item"
-            onClick={toggleMobileMenu}
-          >
-            <FaDonate className="mobile-menu-icon" />
-            <span>Donations Page</span>
+          <Link to="/donation-page" className="mobile-menu-item" onClick={toggleMobileMenu}>
+            <BiSolidDonateHeart className="mobile-menu-icon" />
+            <span>Donation Page</span>
           </Link>
-          <Link
-            to="/profile"
-            className="mobile-menu-item"
-            onClick={toggleMobileMenu}
-          >
+          <Link to="/profile" className="mobile-menu-item" onClick={toggleMobileMenu}>
             <FaUser className="mobile-menu-icon" />
             <span>Profile</span>
           </Link>
-
-          <Link
-            to="/settings"
-            className="mobile-menu-item"
-            onClick={toggleMobileMenu}
-          >
+          <Link to="/settings" className="mobile-menu-item" onClick={toggleMobileMenu}>
             <FaCog className="mobile-menu-icon" />
             <span>Account Settings</span>
           </Link>

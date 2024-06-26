@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
 import CryptoKoffee from "../contracts/CryptoKoffee.json";
+import { BlockRangeCalculator } from "./blockRangeCalculator";
 
 const contractAddress = "0xaf8ccd9dc04764f0ab0f07cb96a69098c88dbf2c";
 
@@ -58,13 +59,34 @@ export async function fetchDonationEvents(callback) {
 export async function fetchDonationEventsForWallet(walletAddress, callback) {
   try {
     const contract = await getContract();
+    const provider = new ethers.JsonRpcProvider(
+      "https://rpc-amoy.polygon.technology/"
+    );
+
+    // Ensure the wallet address is correctly formatted
+    if (!ethers.isAddress(walletAddress)) {
+      throw new Error("Invalid wallet address");
+    }
+
+    // Create the filter for DonationEvent
     const donationFilter = contract.filters.DonationEvent(
       null,
       walletAddress,
-      null,
+      null
     );
-    const events = await contract.queryFilter(donationFilter, 0, "latest");
 
+    // Fetch the latest block number to set a more specific range
+    const latestBlock = await provider.getBlockNumber();
+    const fromBlock = BlockRangeCalculator.calculate(latestBlock);
+
+    // Query the events using the filter
+    const events = await contract.queryFilter(
+      donationFilter,
+      fromBlock,
+      "latest"
+    );
+
+    // Format the events
     const formattedEvents = events.map((event) => ({
       amount: ethers.formatEther(event.args.amount),
       donor: event.args.donor,
@@ -72,7 +94,6 @@ export async function fetchDonationEventsForWallet(walletAddress, callback) {
       recipient: event.args.recipient,
     }));
 
-    console.log("Donation events for wallet:", formattedEvents);
     callback(formattedEvents); // Callback with the data
   } catch (error) {
     console.error("Error fetching donation events for wallet:", error);
@@ -152,13 +173,57 @@ export const createWallet = async () => {
   return transaction;
 };
 
+// export const donate = async (donationAddress, amount) => {
+//   const contract = await getContract();
+//   try {
+//     const value = ethers.parseUnits(amount.toString(), "ether");
+
+//     // const valueInWei = BigInt(value.toString());
+
+//     const tx = await contract.donate(donationAddress, {
+//       value,
+//     });
+
+//     console.log("Value here:", value);
+//     console.log("Value in wei:", valueInWei);
+//     const receipt = await tx.wait();
+//     return receipt;
+//   } catch (error) {
+//     console.error("Error donating:", error);
+//     throw error;
+//   }
+// };
+
 export const donate = async (donationAddress, amount) => {
   const contract = await getContract();
-  const transaction = await contract.donate(donationAddress, {
-    value: ethers.parseEther(amount),
-  });
-  await transaction.wait();
-  return transaction;
+  try {
+    // Convert the string amount to Wei using parseUnits which returns BigInt
+    // const value = ethers.parseUnits(amount, "ether");
+    const value = amount;
+
+    console.log("Converted Value (Wei):", value.toString());
+
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+    const balance = await provider.getBalance(signer.address);
+
+    console.log("Balance (Wei):", balance.toString());
+    console.log("Amount to Send (Wei):", value.toString());
+
+    if (balance < value) {
+      throw new Error("Insufficient funds");
+    }
+
+    // const gasEstimate = await contract.donate.estimateGas(donationAddress, { value });
+    const tx = await contract.donate(donationAddress, {
+      value,
+    });
+    const receipt = await tx.wait();
+    return receipt;
+  } catch (error) {
+    console.error("Error donating:", error);
+    throw error;
+  }
 };
 
 export const withdrawFunds = async (toAddress, amount) => {
@@ -170,8 +235,6 @@ export const withdrawFunds = async (toAddress, amount) => {
   await transaction.wait();
   return transaction;
 };
-
-
 
 export const getWallet = async () => {
   const contract = await getContract();
@@ -211,21 +274,15 @@ export const hashString = async (string) => {
   return hash;
 };
 
-export const data = {}
+export const data = {};
 
 
 export const getNetworkType = async (walletAddress) => {
   // Assuming you have a provider set up
-  const provider = new ethers.JsonRpcProvider('https://rpc-amoy.polygon.technology/');
+  const provider = new ethers.JsonRpcProvider(
+    "https://rpc-amoy.polygon.technology/"
+  );
 
   const network = await provider.getNetwork();
-  switch (network.chainId) {
-    case 1: // Ethereum Mainnet
-      return "ETH";
-    case 137: // Polygon Mainnet
-      return "MATIC";
-    // Add more cases as needed
-    default:
-      return "ETH"; // Default to ETH if unknown
-  }
+  return network.chainId; // Return the chain ID
 };
