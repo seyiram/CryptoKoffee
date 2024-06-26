@@ -1,8 +1,8 @@
 
-import { DynamoDBClient, GetItemCommand, QueryCommand } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, GetItemCommand, QueryCommand, DeleteItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 
-const dynamodb = new DynamoDBClient({
+export const dynamodb = new DynamoDBClient({
   region: import.meta.env.VITE_AWS_REGION,
   credentials: {
     accessKeyId: import.meta.env.VITE_AWS_S3_SECRET_ACCESS_KEY_ID,
@@ -45,3 +45,17 @@ export const getUserProfileByCustomUrl = async (customUrl) => {
   }
 };
 
+export const deleteUserProfile = async (userId) => {
+  const params = {
+    TableName: "UserProfiles",
+    Key: marshall({ user_id: userId }),
+  };
+
+  try {
+    await dynamodb.send(new DeleteItemCommand(params));
+    return true;
+  } catch (error) {
+    console.error("Error deleting user profile:", error);
+    return false;
+  }
+};

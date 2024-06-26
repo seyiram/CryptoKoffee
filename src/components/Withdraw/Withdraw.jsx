@@ -39,9 +39,6 @@ const Withdraw = () => {
           const networkType = await getNetworkType(walletInfo.walletAddress);
           const coinCode = getCoinCodeByChainId(networkType);
           setSelectedCoin(coinCode);
-          console.log("Coin code here", coinCode);
-          console.log("Network type here", networkType, typeof networkType);
-          console.log("Selected coin", selectedCoin);
         }
       }
     };
@@ -49,7 +46,7 @@ const Withdraw = () => {
     fetchData().catch(console.error);
 
     return () => {
-      isMounted = false; // Cleanup 
+      isMounted = false; // Cleanup
     };
   }, [wallet?.walletAddress]);
 

@@ -17,23 +17,11 @@ import { toast } from "react-toastify";
 import { getWallet } from "../../utils/interact";
 import { S3, HeadObjectCommand } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
-import {
-  DynamoDBClient,
-  GetItemCommand,
-  PutItemCommand,
-} from "@aws-sdk/client-dynamodb";
+import { PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
-import { getUserProfile } from "../../utils/aws";
+import { getUserProfile, dynamodb } from "../../utils/aws";
 
 const s3 = new S3({
-  region: import.meta.env.VITE_AWS_REGION,
-  credentials: {
-    accessKeyId: import.meta.env.VITE_AWS_S3_SECRET_ACCESS_KEY_ID,
-    secretAccessKey: import.meta.env.VITE_AWS_S3_SECRET_ACCESS_KEY,
-  },
-});
-
-const dynamodb = new DynamoDBClient({
   region: import.meta.env.VITE_AWS_REGION,
   credentials: {
     accessKeyId: import.meta.env.VITE_AWS_S3_SECRET_ACCESS_KEY_ID,
@@ -45,9 +33,8 @@ const DonationPage = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [walletAddress, setWalletAddress] = React.useState(null);
   const navigate = useNavigate();
-  const { customUrl} = useParams();
+  const { customUrl } = useParams();
 
-  console.log("Custom URL:", customUrl);
 
   const fetchUserProfile = async () => {
     const wallet = await getWallet();
@@ -55,7 +42,6 @@ const DonationPage = () => {
     if (walletAddress) {
       const userId = `user-${walletAddress}`;
       const profile = await getUserProfile(userId);
-      // console.log("User Profile:", profile);
       if (profile) {
         dispatch({
           type: "SET_LINK",
@@ -98,21 +84,6 @@ const DonationPage = () => {
   useEffect(() => {
     fetchUserProfile();
   }, [walletAddress]);
-
-  // const getUserProfile = async (userId) => {
-  //   const params = {
-  //     TableName: "UserProfiles",
-  //     Key: marshall({ user_id: userId }),
-  //   };
-
-  //   try {
-  //     const { Item } = await dynamodb.send(new GetItemCommand(params));
-  //     return Item ? unmarshall(Item) : null;
-  //   } catch (error) {
-  //     console.error("Error fetching user profile:", error);
-  //     return null;
-  //   }
-  // };
 
   const checkIfFileExists = async (Key) => {
     const params = {
@@ -164,7 +135,7 @@ const DonationPage = () => {
   };
 
   const handleProfilePictureChange = async (e) => {
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files?.[0]) {
       const file = e.target.files[0];
       const maxSize = 1 * 1024 * 1024; // 1MB
 
@@ -239,7 +210,7 @@ const DonationPage = () => {
       toast.success("User profile updated successfully!");
     } catch (error) {
       if (error.name === "ConditionalCheckFailedException") {
-        // If the condition fails, it means the user profile does not exist, so we create it
+        // If the condition fails, the user profile does not exist, so create it
         const createParams = {
           TableName: "UserProfiles",
           Item: marshall(userProfile),
@@ -317,7 +288,7 @@ const DonationPage = () => {
               onChange={(e) =>
                 dispatch({ type: "SET_TWITTER_LINK", payload: e.target.value })
               }
-              placeholder="X link"  
+              placeholder="X link"
             />
             <input
               type="text"
