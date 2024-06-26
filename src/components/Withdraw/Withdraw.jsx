@@ -97,7 +97,7 @@ const Withdraw = () => {
       <div className="withdraw-container">
         <h2 className="withdraw-title">Withdraw</h2>
         <div className="withdraw-coin">
-          <label>Coin:</label>
+          <label htmlFor="coin-selector">Coin:</label>
           <div className="coin-selector">
             <select
               value={selectedCoin}
@@ -112,13 +112,13 @@ const Withdraw = () => {
           </div>
         </div>
         <div className="withdraw-balance">
-          <label>Total Balance:</label>
+          <label htmlFor="withdraw-balance">Total Balance:</label>
           <span>
             {balance} {selectedCoin}
           </span>
         </div>
         <div className="withdraw-input">
-          <label>Withdraw Address</label>
+          <label htmlFor="withdraw-input">Withdraw Address</label>
           <div className="input-with-icon">
             <input
               type="text"
@@ -127,7 +127,7 @@ const Withdraw = () => {
               onChange={(e) => setWithdrawAddress(e.target.value)}
               required
             />
-            <p
+            <button
               className="icon"
               onClick={() =>
                 navigator.clipboard
@@ -135,14 +135,15 @@ const Withdraw = () => {
                   .then((text) => setWithdrawAddress(text))
               }
             >
-              paste
-            </p>
+              Paste
+            </button>
           </div>
         </div>
         <div className="withdraw-input">
-          <label>Amount</label>
+          <label htmlFor="amount">Amount</label>
           <div className="input-with-icon">
             <input
+              id="amount"
               type="text"
               placeholder="Amount"
               value={amount}

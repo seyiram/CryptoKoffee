@@ -173,32 +173,11 @@ export const createWallet = async () => {
   return transaction;
 };
 
-// export const donate = async (donationAddress, amount) => {
-//   const contract = await getContract();
-//   try {
-//     const value = ethers.parseUnits(amount.toString(), "ether");
-
-//     // const valueInWei = BigInt(value.toString());
-
-//     const tx = await contract.donate(donationAddress, {
-//       value,
-//     });
-
-//     console.log("Value here:", value);
-//     console.log("Value in wei:", valueInWei);
-//     const receipt = await tx.wait();
-//     return receipt;
-//   } catch (error) {
-//     console.error("Error donating:", error);
-//     throw error;
-//   }
-// };
-
 export const donate = async (donationAddress, amount) => {
   const contract = await getContract();
   try {
     // Convert the string amount to Wei using parseUnits which returns BigInt
-    // const value = ethers.parseUnits(amount, "ether");
+
     const value = amount;
 
     console.log("Converted Value (Wei):", value.toString());
@@ -214,7 +193,6 @@ export const donate = async (donationAddress, amount) => {
       throw new Error("Insufficient funds");
     }
 
-    // const gasEstimate = await contract.donate.estimateGas(donationAddress, { value });
     const tx = await contract.donate(donationAddress, {
       value,
     });
@@ -275,7 +253,6 @@ export const hashString = async (string) => {
 };
 
 export const data = {};
-
 
 export const getNetworkType = async (walletAddress) => {
   // Assuming you have a provider set up

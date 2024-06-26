@@ -125,7 +125,6 @@ const OverviewCard = () => {
     return `${change.toFixed(2)}%`;
   };
 
-  // console.log("donation history", donationHistory);
 
   const currentBalanceChange = calculatePercentageChange(
     wallet?.currentBalance || 0,

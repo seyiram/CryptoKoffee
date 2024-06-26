@@ -13,7 +13,6 @@ const TopDonors = () => {
       setWallet(walletInfo);
       if (walletInfo?.walletAddress) {
         fetchDonationEventsForWallet(walletInfo.walletAddress, (donations) => {
-          // console.log("Donations here", donations);
           setDonationHistory(donations);
 
           if (donations.length === 0) {
@@ -63,6 +62,8 @@ const TopDonors = () => {
 
   const topDonors = processDonations(donationHistory);
 
+  console.log("donationHistory:", donationHistory)
+
   return (
     <div className="top-donors">
       <h3>Top Donors</h3>
@@ -71,7 +72,7 @@ const TopDonors = () => {
       ) : (
         <ul className="donors-list">
           {topDonors.map((donor, index) => (
-            <li key={index} className="donor-item">
+            <li key={`${donor.address}-${donor.amount}`} className="donor-item">
               <img
                 src={donor.avatar}
                 alt={donor.address}
