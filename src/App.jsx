@@ -8,7 +8,7 @@ import Settings from "./components/Settings/Settings";
 import Sidebar from "./components/Sidebar/Sidebar";
 import DonationPage from "./components/DonationPage/DonationPage";
 import UserProfile from "./components/UserProfile/UserProfile";
-import { ToastContainer } from "react-toastify";
+import { Slide, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
@@ -27,7 +27,7 @@ function App() {
         </Routes>
       </div>
 
-      <ToastContainer />
+      <ToastContainer transition={Slide} />
     </div>
   );
 }
