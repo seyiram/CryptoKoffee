@@ -94,7 +94,11 @@ export async function fetchDonationEventsForWallet(walletAddress, callback) {
       recipient: event.args.recipient,
     }));
 
-    callback(formattedEvents); // Callback with the data
+    const filteredEvents = formattedEvents.filter(
+      (event) => event.recipient === walletAddress
+    );
+
+    callback(filteredEvents); // Callback with the data
   } catch (error) {
     console.error("Error fetching donation events for wallet:", error);
     callback([]);
@@ -176,8 +180,6 @@ export const createWallet = async () => {
 export const donate = async (donationAddress, amount) => {
   const contract = await getContract();
   try {
-   
-
     const value = amount;
 
     console.log("Converted Value (Wei):", value.toString());
