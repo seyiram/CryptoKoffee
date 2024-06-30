@@ -9,22 +9,13 @@ import binanceIcon from "../../assets/icons/binance.svg";
 import tronIcon from "../../assets/icons/tron.svg";
 
 const fetchPrices = async () => {
-  const apiKey = import.meta.env.VITE_COINMARKETCAP_API_KEY;
-  const symbols = "BTC,ETH,SOL,MATIC,BNB,TRX";
-  const convert = "USDT";
-
-  const url = `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=${symbols}&convert=${convert}`;
-
-  const response = await fetch(url, {
-    headers: {
-      "X-CMC_PRO_API_KEY": apiKey,
-    },
-  });
-
+  const response = await fetch(
+    "https://cryptokoffee-backend.netlify.app/.netlify/functions/fetchPrices"
+  );
   if (!response.ok) {
     throw new Error("Network response was not ok");
   }
-
+  console.log("response here", response);
   return response.json();
 };
 

@@ -15,6 +15,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import useExchangeRate from "../../hooks/useExchangeRate";
 import Avatar from "../../assets/icons/Avatar";
 
+const provider = new ethers.BrowserProvider(window.ethereum);
+
 const UserProfile = () => {
   const [profile, setProfile] = useState(null);
   const [walletInfo, setWalletInfo] = useState(null);
@@ -23,6 +25,7 @@ const UserProfile = () => {
   const [currentNetwork, setCurrentNetwork] = useState(null);
   const [loading, setLoading] = useState(true);
   const [donationEvents, setDonationEvents] = useState([]);
+  const [numOfDonations, setNumOfDonations] = useState();
   const navigate = useNavigate();
   const { customUrl } = useParams();
 
@@ -30,7 +33,7 @@ const UserProfile = () => {
     data: exchangeRate,
     isLoading,
     isError,
-  } = useExchangeRate(currentNetwork?.chainId);
+  } = useExchangeRate(Number(currentNetwork?.chainId));
 
   useEffect(() => {
     const fetchWalletInfo = async () => {
@@ -41,31 +44,54 @@ const UserProfile = () => {
     fetchWalletInfo();
   }, []);
 
+
   useEffect(() => {
     const initializeProfile = async () => {
       try {
         const wallet = await getWallet();
         setWalletInfo(wallet);
 
+        console.log("Wallet Info:", wallet);
+
         if (customUrl) {
-          const prefixedCustomUrl = `https://cryptokoffee.co/donate/${customUrl}`;
+          console.log("Fetching profile using customUrl:", customUrl);
+          const prefixedCustomUrl = `cryptokoffee.com/donate/${customUrl}`;
+          console.log("prefixedcustomurl:", prefixedCustomUrl);
           const userProfile = await getUserProfileByCustomUrl(
             prefixedCustomUrl
           );
-          setProfile(userProfile || null);
+          console.log("Fetched profile by customUrl:", userProfile);
+          if (userProfile) {
+            setProfile(userProfile);
+            fetchDonationEventsForWallet(
+              userProfile.wallet_address,
+              (donations) => {
+                setDonationEvents(donations);
+                setNumOfDonations(donations.length);
+              }
+            );
+          } else {
+            setProfile(null);
+          }
         } else if (wallet?.walletAddress) {
+          console.log(
+            "Fetching profile using wallet address:",
+            wallet.walletAddress
+          );
           const userId = `user-${wallet.walletAddress}`;
           const userProfile = await getUserProfile(userId);
+          console.log("Fetched profile by wallet address:", userProfile);
           setProfile(userProfile || null);
 
-          // console.log("wallet Address", walletInfo.walletAddress)
-          // Fetch donation events for the profile
-          fetchDonationEventsForWallet(wallet.walletAddress, (donations) => {
+          fetchDonationEventsForWallet(wallet?.walletAddress, (donations) => {
             setDonationEvents(donations);
+            setNumOfDonations(donations.length);
           });
+
         }
       } catch (error) {
         toast.error("Error loading profile");
+        console.error("Error initializing profile:", error);
       } finally {
         setLoading(false);
       }
@@ -176,10 +202,16 @@ const UserProfile = () => {
 
       console.log("Transaction:", tx);
 
-      const receipt = await tx.wait();
+      const receipt = await provider.waitForTransaction(tx.hash, 1);
 
       if (receipt.status === 1) {
         toast.success("Donation successful!");
+
+        // Fetch and update the donation events
+        fetchDonationEventsForWallet(profile.wallet_address, (donations) => {
+          setDonationEvents(donations);
+          setNumOfDonations(donations.length);
+        });
       } else {
         toast.error("Donation failed. Please try again.");
       }
@@ -203,6 +235,12 @@ const UserProfile = () => {
     if (!address) return "";
     return `${address.slice(0, 11)}...${address.slice(-6)}`;
   };
+
+  console.log("Number of donations", numOfDonations);
+
+  console.log("profile here", profile);
+
+  console.log("Current Network", Number(currentNetwork.chainId));
 
   return (
     <div className="user-profile-page">
@@ -259,7 +297,7 @@ const UserProfile = () => {
                 </div>
               </div>
               <div className="supporters">
-                <span>{walletInfo?.numOfDonations} supporters</span>
+                <span>{numOfDonations} supporters</span>
               </div>
             </div>
           </div>
@@ -297,7 +335,7 @@ const UserProfile = () => {
         <h2>Recent Supporters</h2>
         {donationEvents.map((supporter, index) => (
           <div
-          key={`${supporter.donor}-${supporter.amount}`}
+            key={`${supporter.donor}-${supporter.amount}`}
             className="supporter-card"
           >
             <div className="supporter-avatar">

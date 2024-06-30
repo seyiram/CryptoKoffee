@@ -3,10 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 const fetchExchangeRate = async (chainId) => {
     let coinCode = "ETH";
   
-    switch (chainId) {
+    switch (Number(chainId)) {
       case 137: // Polygon Mainnet
       case 80001: // Polygon Mumbai Testnet
-      case 80002n: // Polygon Testnet ( 80002 is a testnet)
+      case 80002: // Polygon Testnet ( 80002 is a testnet)
         coinCode = "MATIC";
         break;
       default:

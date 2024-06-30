@@ -3,9 +3,6 @@ import { FaSearch, FaBell } from "react-icons/fa";
 import "./Header.css";
 import { initializeProvider, getWallet, createWallet, data } from "../../utils/interact";
 import { toast } from "react-toastify";
-// import 'react-toastify/dist/ReactToastify.css';
-
-// toast.configure();
 
 const Header = () => {
   const [account, setAccount] = useState(null);

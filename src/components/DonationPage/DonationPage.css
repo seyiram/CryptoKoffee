@@ -8,6 +8,7 @@
   width: 100%;
   display: flex;
   justify-content: center;
+  margin-top: 3rem;
 }
 
 .donation-link {
@@ -29,19 +30,39 @@
   color: #191e28;
 }
 
+.donation-link-prefix{
+  color: #000;
+  background-color: #e6e6e6;
+  padding: 0.875rem;
+  width: 100%;
+  max-width: 14.688rem;
+  border-right: 1px solid #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .donation-link .input-group {
   display: flex;
   align-items: center;
   position: relative;
+  margin-top: 0.5rem;
+}
+
+.donation-link .input-container {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 35rem;
 }
 
 .donation-link .input-group input {
   padding: 0.75rem;
   margin-right: 5px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  width: 42%;
+  border: none;
+  width: 100%;
   margin-top: 0.5rem;
+  flex-grow: 1;
 }
 
 .donation-link .input-group input:focus {
@@ -50,9 +71,9 @@
 }
 
 .donation-link .copy-icon {
-  position: absolute;
-  right: 59%;
   cursor: pointer;
+  margin-right: 0.5rem;
+  width: 3rem;
 }
 
 .donation-link .copy-icon:hover,
@@ -80,7 +101,7 @@
   transform: translate(-0.25rem, -0.25rem);
 }
 .visit-page-btn {
-  margin-top: 0.5rem;
+  margin-left: 1rem;
 }
 
 .divider {
@@ -111,6 +132,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  max-height: 32rem;
 }
 
 .customization-section h2 {
@@ -143,6 +165,10 @@ textarea:focus {
   align-items: center;
   gap: 10px;
   margin-top: 1rem;
+}
+
+.profile-picture-upload .profile-picture {
+  max-width: 11rem;
 }
 
 .upload-card {
@@ -188,6 +214,7 @@ textarea:focus {
 
 .donation-btn-group{
   display: flex;
+  margin-top: 1rem;
 }
 
 .cancel-btn {
@@ -248,10 +275,10 @@ textarea:focus {
     width: 100%;
   }
 
-  .donation-link .copy-icon {
+  /* .donation-link .copy-icon {
     right: 2%;
     top: 20%;
-  }
+  } */
 
   .visit-page-btn {
     margin-top: 1rem;
@@ -277,4 +304,10 @@ textarea:focus {
   .donation-page {
     margin-top: 4rem;
   }
+  .donation-link .input-container {
+    padding-right: 0;
+  }
+ 
 }
+
+

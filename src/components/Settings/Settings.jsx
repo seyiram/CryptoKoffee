@@ -37,10 +37,20 @@ const Settings = () => {
   };
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(wallet);
-    alert("Wallet address copied to clipboard!");
+    if (wallet && wallet.walletAddress) {
+      navigator.clipboard.writeText(wallet.walletAddress)
+        .then(() => {
+          toast.success("Wallet address copied to clipboard!");
+        })
+        .catch(err => {
+          toast.error("Failed to copy wallet address: " + err);
+        });
+    } else {
+      toast.error("No wallet address found to copy.");
+    }
   };
 
+  
   const confirmDeletion = () => {
     return new Promise((resolve) => {
       const toastId = toast.info(

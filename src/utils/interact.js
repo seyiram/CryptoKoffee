@@ -176,7 +176,7 @@ export const createWallet = async () => {
 export const donate = async (donationAddress, amount) => {
   const contract = await getContract();
   try {
-    // Convert the string amount to Wei using parseUnits which returns BigInt
+   
 
     const value = amount;
 

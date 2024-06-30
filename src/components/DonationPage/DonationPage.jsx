@@ -32,9 +32,10 @@ const s3 = new S3({
 const DonationPage = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [walletAddress, setWalletAddress] = React.useState(null);
+  const [isProfileSaved, setIsProfileSaved] = React.useState(false);
+  const [isProfileFetched, setIsProfileFetched] = React.useState(false);
   const navigate = useNavigate();
-  const { customUrl } = useParams();
-
+  // const { customUrl } = useParams();
 
   const fetchUserProfile = async () => {
     const wallet = await getWallet();
@@ -43,6 +44,7 @@ const DonationPage = () => {
       const userId = `user-${walletAddress}`;
       const profile = await getUserProfile(userId);
       if (profile) {
+        setIsProfileFetched(true);
         dispatch({
           type: "SET_LINK",
           payload: profile.custom_url || "",
@@ -184,14 +186,17 @@ const DonationPage = () => {
     // Define user_id based on walletAddress
     const user_id = `user-${walletAddress}`;
 
+    // contruct full url
+    const fullUrl = `https://cryptokoffee.com/donate/${state.displayName}`;
+
     const userProfile = {
       user_id: user_id, // Unique identifier
       wallet_address: walletAddress,
-      custom_url: state.link,
+      custom_url: fullUrl,
       username: state.displayName,
       avatar: state.profilePicture, // S3 URL
       short_bio: state.bio,
-      twitter_link: state.twitterLink,
+      twitter_link: state.twittrLink,
       instagram_link: state.instagramLink,
       youtube_link: state.youtubeLink,
       website_link: state.websiteLink,
@@ -201,22 +206,24 @@ const DonationPage = () => {
 
     const params = {
       TableName: "UserProfiles",
-      Item: marshall(userProfile),
+      Item: marshall(userProfile, { removeUndefinedValues: true }),
       ConditionExpression: "attribute_exists(wallet_address)",
     };
 
     try {
       await dynamodb.send(new PutItemCommand(params));
       toast.success("User profile updated successfully!");
+      setIsProfileSaved(true);
     } catch (error) {
       if (error.name === "ConditionalCheckFailedException") {
         // If the condition fails, the user profile does not exist, so create it
         const createParams = {
           TableName: "UserProfiles",
-          Item: marshall(userProfile),
+          Item: marshall(userProfile, { removeUndefinedValues: true }),
         };
         await dynamodb.send(new PutItemCommand(createParams));
         toast.success("User profile created successfully!");
+        setIsProfileSaved(true);
       } else {
         console.error("Error saving user profile:", error);
         toast.error("Failed to save user profile.");
@@ -225,8 +232,8 @@ const DonationPage = () => {
   };
 
   const handleVisitPage = () => {
-    const userId = `user-${walletAddress}`;
-    navigate(`/donate/${state.link.split("/").pop()}`);
+    const customUrl = state.displayName;
+    navigate(`/donate/${customUrl}`);
   };
 
   return (
@@ -236,25 +243,35 @@ const DonationPage = () => {
           <h2>Donation Page</h2>
           <span className="donation-label">Donation link (your page)</span>
           <div className="input-group">
-            <input
-              type="text"
-              value={state.link}
-              onChange={(e) =>
-                dispatch({ type: "SET_LINK", payload: e.target.value })
-              }
-              placeholder="cryptokoffee.com/donate/0xAnonymous"
-            />
-            <GoCopy
-              onClick={() => navigator.clipboard.writeText(state.link)}
-              className="icon copy-icon"
-            />
-            <button
-              className="visit-page-btn"
-              value={state.link}
-              onClick={handleVisitPage}
-            >
-              Visit Page
-            </button>
+            <div className="input-container">
+              <span className="donation-link-prefix">
+                cryptokoffee.com/donate/
+              </span>
+              <input
+                type="text"
+                value={state.displayName}
+                onChange={(e) =>
+                  dispatch({
+                    type: "SET_DISPLAY_NAME",
+                    payload: e.target.value,
+                  })
+                }
+                placeholder="Enter your username e.g. 0xAnonymous"
+              />
+              <GoCopy
+                onClick={() => navigator.clipboard.writeText(state.link)}
+                className="icon copy-icon"
+              />
+            </div>
+            {isProfileSaved || isProfileFetched ? (
+              <button
+                className="visit-page-btn"
+                value={state.link}
+                onClick={handleVisitPage}
+              >
+                Visit Page
+              </button>
+            ) : null}
           </div>
           <hr className="divider" />
         </div>
@@ -335,7 +352,11 @@ const DonationPage = () => {
           />
           <div className="profile-picture-upload">
             {state.profilePicture && (
-              <img src={state.profilePicture} alt="Profile" />
+              <img
+                className="profile-picture"
+                src={state.profilePicture}
+                alt="Profile"
+              />
             )}
             <label htmlFor="profile-picture" className="upload-card">
               <SlCloudUpload className="icon profile-picture-icon" />
