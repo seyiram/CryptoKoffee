@@ -61,7 +61,7 @@ const OverviewCard = () => {
       if (wallet?.walletAddress) {
         fetchDonationEventsForWallet(wallet.walletAddress, (donations) => {
           setDonationHistory(donations);
-          if (donations) {
+          if (donations.length) {
             processDonations(donations);
             setNoDonations(false);
           } else {
@@ -131,6 +131,8 @@ const OverviewCard = () => {
     Number(previousBalance)
   );
 
+
+  console.log("No donations ", noDonations)
   return (
     <div className="donation-card">
       <div className="donation-header">
