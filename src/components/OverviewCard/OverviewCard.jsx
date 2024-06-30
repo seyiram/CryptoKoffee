@@ -15,7 +15,6 @@ import {
   getContract,
   getWallet,
   fetchDonationEventsForWallet,
-  fetchPaymentEvents,
 } from "../../utils/interact";
 
 const CustomTooltip = ({ active = false, payload = [], label = "" }) => {
@@ -120,15 +119,16 @@ const OverviewCard = () => {
   };
 
   const calculatePercentageChange = (current, previous) => {
-    if (previous === 0) return current === 0 ? "0%" : "+100%";
+    if (previous === 0 || isNaN(previous)) return current === 0 ? "0%" : "+100%";
+    if (isNaN(current)) return "0%"; // Ensure current is not NaN
     const change = ((current - previous) / previous) * 100;
     return `${change.toFixed(2)}%`;
   };
 
 
   const currentBalanceChange = calculatePercentageChange(
-    wallet?.currentBalance || 0,
-    previousBalance
+    Number(wallet?.currentBalance || 0),
+    Number(previousBalance)
   );
 
   return (
@@ -139,6 +139,7 @@ const OverviewCard = () => {
           <FaCalendarAlt className="calendar-icon" />
           <select>
             <option>Last Month</option>
+            
             <option>January</option>
             <option>February</option>
             <option>March</option>
