@@ -10,6 +10,7 @@ import DonationPage from "./components/DonationPage/DonationPage";
 import UserProfile from "./components/UserProfile/UserProfile";
 import { Slide, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import NotFound from "./components/NotFound/NotFound";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/donate/:customUrl" element={<UserProfile />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
 
