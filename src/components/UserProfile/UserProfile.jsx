@@ -198,7 +198,9 @@ const UserProfile = () => {
       }
 
       // Send the donation
-      const tx = await donate(profile?.wallet_address, weiAmount.toString());
+      const tx = await donate(profile?.wallet_address, weiAmount.toString(), {
+        gasLimit: BigInt(60000)
+      });
 
       console.log("Transaction:", tx);
 
