@@ -187,7 +187,7 @@ const DonationPage = () => {
     const user_id = `user-${walletAddress}`;
 
     // contruct full url
-    const fullUrl = `https://cryptokoffee.com/donate/${state.displayName}`;
+    const fullUrl = `cryptokoffee.com/donate/${state.displayName}`;
 
     const userProfile = {
       user_id: user_id, // Unique identifier
