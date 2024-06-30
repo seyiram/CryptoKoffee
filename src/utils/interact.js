@@ -172,9 +172,16 @@ export const fetchPaymentEventsForWallet = async (walletAddress, callback) => {
 
 export const createWallet = async () => {
   const contract = await getContract();
-  const transaction = await contract.createWallet();
-  await transaction.wait();
-  return transaction;
+
+  try {
+    const transaction = await contract.createWallet({});
+
+    await transaction.wait();
+
+    return transaction;
+  } catch (error) {
+    console.error("Error:", error);
+  }
 };
 
 export const donate = async (donationAddress, amount) => {
