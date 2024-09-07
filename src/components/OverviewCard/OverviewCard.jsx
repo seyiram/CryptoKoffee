@@ -39,22 +39,27 @@ const OverviewCard = () => {
   const [previousBalance, setPreviousBalance] = useState(0);
   const [noDonations, setNoDonations] = useState(false);
 
-  useEffect(() => {
-    async function fetchData() {
-      await initializeProvider(); // Initialize provider and signer
 
+
+  useEffect(() => {
+    const storedAccount = localStorage.getItem("account");
+    if (storedAccount) {
+      fetchData();
+    }
+  }, []);
+  
+  const fetchData = async () => {
+    try {
+      await initializeProvider();
       const contractInstance = await getContract();
       setContract(contractInstance);
-
       const walletInfo = await getWallet();
       setWallet(walletInfo);
-
-      // store previous balance
       setPreviousBalance(walletInfo?.currentBalance || 0);
+    } catch (error) {
+      console.error("Error fetching data", error);
     }
-
-    fetchData().catch(console.error);
-  }, []);
+  };
 
   useEffect(() => {
     const getData = async () => {

@@ -3,18 +3,30 @@ import './ActivityCard.css';
 import { getWallet, fetchDonationEventsForWallet } from '../../utils/interact';
 import Avatar from '../../assets/icons/Avatar';
 
+
+
+
+
 const ActivityCard = () => {
   const [activities, setActivities] = useState({ today: [], yesterday: [], lastWeek: [] });
   const [walletAddress, setWalletAddress] = useState(null);
 
+
   useEffect(() => {
-    const fetchData = async () => {
+    const storedAccount = localStorage.getItem("account");
+    if (storedAccount) {
+      fetchWalletData(storedAccount);
+    }
+  }, []);
+
+  const fetchWalletData = async (account) => {
+    try {
       const walletInfo = await getWallet();
       setWalletAddress(walletInfo.walletAddress);
-    };
-
-    fetchData().catch(console.error);
-  }, []);
+    } catch (error) {
+      console.error("Error fetching wallet data", error);
+    }
+  };
 
   useEffect(() => {
     if (walletAddress) {

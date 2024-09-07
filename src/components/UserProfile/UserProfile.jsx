@@ -45,60 +45,44 @@ const UserProfile = () => {
   }, []);
 
 
+
   useEffect(() => {
-    const initializeProfile = async () => {
-      try {
+    const storedAccount = localStorage.getItem("account");
+    initializeProfile(storedAccount, customUrl);
+  }, [customUrl]);
+  
+  const initializeProfile = async (account, customUrl = null) => {
+    try {
+      setLoading(true);
+      let userProfile = null;
+  
+      if (customUrl) {
+        const prefixedCustomUrl = `cryptokoffee.com/donate/${customUrl}`;
+        userProfile = await getUserProfileByCustomUrl(prefixedCustomUrl);
+      } else if (account) {
         const wallet = await getWallet();
         setWalletInfo(wallet);
-
-        console.log("Wallet Info:", wallet);
-
-        if (customUrl) {
-          console.log("Fetching profile using customUrl:", customUrl);
-          const prefixedCustomUrl = `cryptokoffee.com/donate/${customUrl}`;
-          console.log("prefixedcustomurl:", prefixedCustomUrl);
-          const userProfile = await getUserProfileByCustomUrl(
-            prefixedCustomUrl
-          );
-          console.log("Fetched profile by customUrl:", userProfile);
-          if (userProfile) {
-            setProfile(userProfile);
-            fetchDonationEventsForWallet(
-              userProfile.wallet_address,
-              (donations) => {
-                setDonationEvents(donations);
-                setNumOfDonations(donations.length);
-              }
-            );
-          } else {
-            setProfile(null);
-          }
-        } else if (wallet?.walletAddress) {
-          console.log(
-            "Fetching profile using wallet address:",
-            wallet.walletAddress
-          );
-          const userId = `user-${wallet.walletAddress}`;
-          const userProfile = await getUserProfile(userId);
-          console.log("Fetched profile by wallet address:", userProfile);
-          setProfile(userProfile || null);
-
-          fetchDonationEventsForWallet(wallet?.walletAddress, (donations) => {
-            setDonationEvents(donations);
-            setNumOfDonations(donations.length);
-          });
-
-        }
-      } catch (error) {
-        toast.error("Error loading profile");
-        console.error("Error initializing profile:", error);
-      } finally {
-        setLoading(false);
+        const userId = `user-${wallet.walletAddress}`;
+        userProfile = await getUserProfile(userId);
       }
-    };
+  
+      if (userProfile) {
+        setProfile(userProfile);
+        fetchDonationEventsForWallet(userProfile.wallet_address, (donations) => {
+          setDonationEvents(donations);
+          setNumOfDonations(donations.length);
+        });
+      } else {
+        setProfile(null);
+      }
+    } catch (error) {
+      toast.error("Error loading profile");
+      console.error("Error initializing profile:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    initializeProfile();
-  }, [customUrl]);
 
   useEffect(() => {
     const detectNetwork = async () => {
