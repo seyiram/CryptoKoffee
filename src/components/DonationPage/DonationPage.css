@@ -1,6 +1,6 @@
 .donation-page {
   background-color: #f4f6f9;
-  padding: 20px;
+  padding: 1.25rem;
   font-family: "GT Walsheim Pro", sans-serif;
 }
 
@@ -14,14 +14,14 @@
 .donation-link {
   background: #fff;
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
   width: 100%;
   margin-bottom: 1rem;
 }
 
 .donation-link h2 {
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 }
 
 .donation-link .donation-label {
@@ -36,7 +36,7 @@
   padding: 0.875rem;
   width: 100%;
   max-width: 14.688rem;
-  border-right: 1px solid #ccc;
+  border-right: 0.0625rem solid #ccc;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -50,19 +50,20 @@
 }
 
 .donation-link .input-container {
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 0.0625rem solid #ccc;
+  border-radius: 0.25rem;
   width: 100%;
   max-width: 35rem;
 }
 
 .donation-link .input-group input {
   padding: 0.75rem;
-  margin-right: 5px;
+  margin-right: 0.3125rem;
   border: none;
   width: 100%;
-  margin-top: 0.5rem;
+  /* margin-top: 0.5rem; */
   flex-grow: 1;
+  font-size: 1rem;
 }
 
 .donation-link .input-group input:focus {
@@ -84,11 +85,11 @@
 .visit-page-btn,
 .save-btn {
   padding: 0.75rem 1.25rem;
-  margin-left: 10px;
+  margin-left: 0.625rem;
   background-color: #000;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 0.25rem;
   cursor: pointer;
   transition: box-shadow 0.2s ease, transform 0.2s ease,
     background-color 0.2s ease, color 0.2s ease;
@@ -102,29 +103,30 @@
 }
 .visit-page-btn {
   margin-left: 1rem;
+  padding: 1rem;
 }
 
 .divider {
-  border: 1px solid #eee;
+  border: 0.0625rem solid #eee;
   margin-top: 3rem;
 }
 
 .lower-section {
   display: flex;
-  gap: 20px;
+  gap: 1.25rem;
 }
 
 .customization-section,
 .page-preview {
   background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.25rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
 }
 
 .customization-section {
   flex: 2;
-  margin-right: 10px;
+  margin-right: 0.625rem;
 }
 
 .page-preview {
@@ -133,10 +135,11 @@
   flex-direction: column;
   justify-content: flex-start;
   max-height: 32rem;
+  font-size: 1rem;
 }
 
 .customization-section h2 {
-  margin-bottom: 10px;
+  margin-bottom: 0.625rem;
 }
 
 .customization-section .input-group {
@@ -144,13 +147,16 @@
   flex-direction: column;
 }
 
+
+
 .customization-section input,
 .customization-section textarea {
   padding: 0.75rem;
-  margin: 5px 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  margin: 0.3125rem 0;
+  border: 0.0625rem solid #ccc;
+  border-radius: 0.25rem;
   width: 90%;
+  font-size: 1rem;
 }
 
 .customization-section input:focus,
@@ -163,7 +169,7 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 0.625rem;
   margin-top: 1rem;
 }
 
@@ -176,23 +182,23 @@ textarea:focus {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  padding: 1.25rem;
+  border: 0.0625rem solid #ccc;
+  border-radius: 0.5rem;
   cursor: pointer;
   text-align: center;
 }
 
 .upload-card .profile-picture-icon {
   color: #191e28;
-  font-size: 20px;
-  margin-bottom: 10px;
+  font-size: 1.25rem;
+  margin-bottom: 0.625rem;
 }
 
 .upload-text {
   display: flex;
-  gap: 5px;
-  margin-bottom: 5px;
+  gap: 0.3125rem;
+  margin-bottom: 0.3125rem;
 }
 
 .click-to-upload {
@@ -205,7 +211,7 @@ textarea:focus {
 
 .upload-instructions {
   color: #999;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .hidden-input {
@@ -218,8 +224,8 @@ textarea:focus {
 }
 
 .cancel-btn {
-  padding: 8px 16px;
-  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
   border: none;
   cursor: pointer;
   background-color: #ccc;
@@ -231,33 +237,33 @@ textarea:focus {
 }
 
 .page-preview h2 {
-  margin-bottom: 10px;
+  margin-bottom: 0.625rem;
 }
 
 .preview-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  padding: 1.25rem;
   gap: 1rem;
 }
 
 .preview-card img {
-  width: 100px;
-  height: 100px;
+  width: 6.25rem;
+  height: 6.25rem;
   border-radius: 50%;
-  margin-bottom: 10px;
+  margin-bottom: 0.625rem;
 }
 
 .social-icons-preview {
   display: flex;
-  gap: 10px;
+  gap: 0.625rem;
   margin-top: 1rem;
 }
 
 .social-icons-preview a {
   color: #191e28;
-  font-size: 24px;
+  font-size: 1.5rem;
   transition: color 0.2s;
 }
 
@@ -266,7 +272,7 @@ textarea:focus {
 }
 
 /* Media Queries for mobile responsiveness */
-@media (max-width: 768px) {
+@media (max-width: 48rem) {
   .donation-link .input-group {
     flex-direction: column;
   }
@@ -280,6 +286,13 @@ textarea:focus {
     top: 20%;
   } */
 
+
+.donation-link-prefix {
+  font-size: 0.8rem;
+  max-width: 100%;
+  display: inline-block;
+}
+
   .visit-page-btn {
     margin-top: 1rem;
   }
@@ -291,7 +304,7 @@ textarea:focus {
   .customization-section,
   .page-preview {
     margin-right: 0;
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
   }
 
   .customization-section input,
@@ -300,7 +313,7 @@ textarea:focus {
   }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 64rem) {
   .donation-page {
     margin-top: 4rem;
   }
@@ -310,4 +323,8 @@ textarea:focus {
  
 }
 
-
+@media (max-width: 30rem) {
+  .donation-link-prefix {
+    font-size: 0.75rem; 
+  }
+}
