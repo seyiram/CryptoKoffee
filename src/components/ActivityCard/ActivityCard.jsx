@@ -31,6 +31,7 @@ const ActivityCard = () => {
   useEffect(() => {
     if (walletAddress) {
       fetchDonationEventsForWallet(walletAddress, (donations) => {
+        console.log("Donations: ", donations);
         const processedActivities = processDonations(donations);
         setActivities(processedActivities);
       });

@@ -1,31 +1,17 @@
 import React from "react";
 import "./PriceTracker.css";
-import { useQuery } from "@tanstack/react-query";
 import bitcoinIcon from "../../assets/icons/bitcoin.svg";
 import ethereumIcon from "../../assets/icons/ethereum.svg";
 import solanaIcon from "../../assets/icons/solana.svg";
 import polygonIcon from "../../assets/icons/polygon.svg";
 import binanceIcon from "../../assets/icons/binance.svg";
 import tronIcon from "../../assets/icons/tron.svg";
+import { useCryptoPrices } from "../../hooks/useCryptoPrices";
 
-const fetchPrices = async () => {
-  const response = await fetch(
-    "https://cryptokoffee-backend.netlify.app/.netlify/functions/fetchPrices"
-  );
-  if (!response.ok) {
-    throw new Error("Network response was not ok");
-  }
-  console.log("response here", response);
-  return response.json();
-};
+
 
 const PriceTracker = () => {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["prices"],
-    queryFn: fetchPrices,
-    staleTime: 1000 * 60 * 60, // 1 hour
-    cacheTime: 1000 * 60 * 60 * 24, // 24 hours
-  });
+const { data, isLoading, error }= useCryptoPrices();
 
   const icons = {
     bitcoin: bitcoinIcon,

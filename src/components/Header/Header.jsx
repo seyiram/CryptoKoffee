@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { FaSearch, FaBell } from "react-icons/fa";
 import "./Header.css";
-import { initializeProvider, getWallet, createWallet, data } from "../../utils/interact";
+import {
+  initializeProvider,
+  getWallet,
+  createWallet,
+  data,
+} from "../../utils/interact";
 import { toast } from "react-toastify";
 
 const Header = () => {
   const [account, setAccount] = useState(null);
   const [walletExists, setWalletExists] = useState(false);
+  const [isCreatingWallet, setIsCreatingWallet] = useState(false);
 
   useEffect(() => {
     const storedAccount = localStorage.getItem("account");
@@ -19,7 +25,11 @@ const Header = () => {
   const checkWalletExists = async (account) => {
     try {
       const walletInfo = await getWallet();
-      if (walletInfo && walletInfo.walletAddress !== "0x0000000000000000000000000000000000000000") {
+      if (
+        walletInfo &&
+        walletInfo.walletAddress !==
+          "0x0000000000000000000000000000000000000000"
+      ) {
         setWalletExists(true);
       } else {
         setWalletExists(false);
@@ -28,7 +38,6 @@ const Header = () => {
       console.error("Error checking wallet existence", error);
     }
   };
-
 
   const connectWallet = async () => {
     if (window.ethereum) {
@@ -56,17 +65,33 @@ const Header = () => {
 
   const handleCreateWallet = async () => {
     try {
+      setIsCreatingWallet(true);
       const walletInfo = await getWallet();
-      if (!walletInfo || walletInfo.walletAddress === "0x0000000000000000000000000000000000000000") {
-        await createWallet();
-        toast.success("Wallet created successfully!");
-        setWalletExists(true);
+      if (
+        !walletInfo ||
+        walletInfo.walletAddress ===
+          "0x0000000000000000000000000000000000000000"
+      ) {
+        const result = await createWallet();
+        if (result?.hash) {
+          toast.success("Wallet created successfully!");
+          setWalletExists(true);
+        } else {
+          toast.error("Error creating wallet. Please try again.");
+        }
       } else {
         toast.info("Wallet already exists.");
       }
     } catch (error) {
       console.error("Error creating wallet", error);
-      toast.error("Error creating wallet: " + error.message);
+      if (error.code === 4001 || error.message.includes("user rejected")) {
+        toast.error("Transaction rejected. Wallet creation canceled.");
+      } else {
+        console.error("Error creating wallet:", error);
+        toast.error("Error creating wallet. Please try again.");
+      }
+    } finally {
+      setIsCreatingWallet(false);
     }
   };
 
@@ -80,8 +105,19 @@ const Header = () => {
       </div>
       <div className="create-wallet-container">
         {account && !walletExists && (
-          <button className="create-wallet-button" onClick={handleCreateWallet}>
-            Create Wallet
+          <button
+            className="create-wallet-button"
+            onClick={handleCreateWallet}
+            disabled={isCreatingWallet}
+          >
+            {isCreatingWallet ? (
+              <>
+                <span className="loader"></span>
+                Creating Wallet...
+              </>
+            ) : (
+              "Create Wallet"
+            )}
           </button>
         )}
       </div>

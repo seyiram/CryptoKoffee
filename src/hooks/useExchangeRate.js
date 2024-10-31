@@ -7,7 +7,7 @@ const fetchExchangeRate = async (chainId) => {
       case 137: // Polygon Mainnet
       case 80001: // Polygon Mumbai Testnet
       case 80002: // Polygon Testnet ( 80002 is a testnet)
-        coinCode = "MATIC";
+        coinCode = "POL";
         break;
       default:
         coinCode = "ETH";
@@ -29,6 +29,7 @@ const fetchExchangeRate = async (chainId) => {
     });
   
     const data = await response.json();
+    console.warn("Data here: ", data);
     const coin = data.find((coin) => coin.code === coinCode);
     if (coin) {
       return coin.rate;
