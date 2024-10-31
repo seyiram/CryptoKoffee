@@ -45,6 +45,31 @@
     background-color 0.2s ease, color 0.2s ease;
 }
 
+.loader {
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3498db;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.create-wallet-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .connect-button:hover,
 .create-wallet-button:hover {
   background-color: #f79e61;

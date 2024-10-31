@@ -26,7 +26,7 @@ contract CryptoKoffee {
 
     event DonationEvent(uint amount, address indexed donor, uint indexed timeStamp, address indexed recipient);
     event WalletInfoEvent(address walletAddress, uint currentWalletBalance, uint numOfDonations);
-    event PaymentEvent(uint amount, uint timeStamp, address sender, address recipient, string description);
+    event PaymentEvent(uint indexed amount, uint indexed timeStamp, address sender, address indexed recipient, string description);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     constructor() {

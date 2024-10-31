@@ -20,10 +20,12 @@ const DonationsPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       const walletInfo = await getWallet();
+      console.warn("Wallet info: ", walletInfo);
       setWallet(walletInfo);
       if (walletInfo?.walletAddress) {
         fetchDonationEventsForWallet(walletInfo.walletAddress, (donations) => {
           setDonations(donations);
+          console.log("Donations: ", donations);
           setFilteredDonations(donations);
         });
 
@@ -35,8 +37,12 @@ const DonationsPage = () => {
       }
     };
 
+    
+
     fetchData().catch(console.error);
   }, [wallet?.walletAddress]);
+
+  // console.log("Donations: ", donations);
 
   useEffect(() => {
     filterDonations(filter, searchTerm);

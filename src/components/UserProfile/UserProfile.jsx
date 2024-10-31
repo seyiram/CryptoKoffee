@@ -1,6 +1,14 @@
 import "./UserProfile.css";
 import React, { useEffect, useState } from "react";
-import { FaTwitter, FaSpotify, FaYoutube, FaDribbble } from "react-icons/fa";
+import {
+  FaTwitter,
+  FaSpotify,
+  FaYoutube,
+  FaDribbble,
+  FaInstagram,
+  FaPatreon,
+  FaGlobe,
+} from "react-icons/fa";
 import { toast } from "react-toastify";
 import { ethers } from "ethers";
 import { getUserProfile, getUserProfileByCustomUrl } from "../../utils/aws";
@@ -12,7 +20,8 @@ import {
 import UserProfileSkeleton from "../../skeleton-loaders/UserProfileSkeleton";
 import CryptoKoffeeCup from "../../assets/cryptokoffee_cup.png";
 import { useNavigate, useParams } from "react-router-dom";
-import useExchangeRate from "../../hooks/useExchangeRate";
+// import useExchangeRate from "../../hooks/useExchangeRate";
+import { useCryptoPrices } from "../../hooks/useCryptoPrices";
 import Avatar from "../../assets/icons/Avatar";
 
 const provider = new ethers.BrowserProvider(window.ethereum);
@@ -29,11 +38,12 @@ const UserProfile = () => {
   const navigate = useNavigate();
   const { customUrl } = useParams();
 
+
   const {
-    data: exchangeRate,
-    isLoading,
-    isError,
-  } = useExchangeRate(Number(currentNetwork?.chainId));
+    data: cryptoPrices,
+    isLoading: isPricesLoading,
+    error: pricesError,
+  } = useCryptoPrices();
 
   useEffect(() => {
     const fetchWalletInfo = async () => {
@@ -44,18 +54,16 @@ const UserProfile = () => {
     fetchWalletInfo();
   }, []);
 
-
-
   useEffect(() => {
     const storedAccount = localStorage.getItem("account");
     initializeProfile(storedAccount, customUrl);
   }, [customUrl]);
-  
+
   const initializeProfile = async (account, customUrl = null) => {
     try {
       setLoading(true);
       let userProfile = null;
-  
+
       if (customUrl) {
         const prefixedCustomUrl = `cryptokoffee.com/donate/${customUrl}`;
         userProfile = await getUserProfileByCustomUrl(prefixedCustomUrl);
@@ -65,13 +73,17 @@ const UserProfile = () => {
         const userId = `user-${wallet.walletAddress}`;
         userProfile = await getUserProfile(userId);
       }
-  
+// console.warn("User profile:", userProfile);
+
       if (userProfile) {
         setProfile(userProfile);
-        fetchDonationEventsForWallet(userProfile.wallet_address, (donations) => {
-          setDonationEvents(donations);
-          setNumOfDonations(donations.length);
-        });
+        fetchDonationEventsForWallet(
+          userProfile.wallet_address,
+          (donations) => {
+            setDonationEvents(donations);
+            setNumOfDonations(donations.length);
+          }
+        );
       } else {
         setProfile(null);
       }
@@ -82,7 +94,6 @@ const UserProfile = () => {
       setLoading(false);
     }
   };
-
 
   useEffect(() => {
     const detectNetwork = async () => {
@@ -146,8 +157,26 @@ const UserProfile = () => {
     setCups(numCups);
   };
 
+  const getExchangeRate = () => {
+    if (!cryptoPrices || !currentNetwork) return null;
+
+    let coinCode;
+    switch (Number(currentNetwork.chainId)) {
+      case 137: // Polygon Mainnet
+      case 80001: // Polygon Mumbai Testnet
+      case 80002: // Polygon Testnet
+        coinCode = "POL";
+        break;
+      default:
+        coinCode = "ETH";
+    }
+
+    return cryptoPrices.data[coinCode]?.quote.USDT.price;
+  };
+
   const handleDonate = async () => {
     try {
+      const exchangeRate = getExchangeRate();
       if (!exchangeRate) {
         toast.error("Exchange rate not available. Please try again later.");
         return;
@@ -183,7 +212,7 @@ const UserProfile = () => {
 
       // Send the donation
       const tx = await donate(profile?.wallet_address, weiAmount.toString(), {
-        gasLimit: BigInt(60000)
+        gasLimit: BigInt(60000),
       });
 
       console.log("Transaction:", tx);
@@ -217,12 +246,22 @@ const UserProfile = () => {
     }
   };
 
+  if (isPricesLoading) {
+    return <UserProfileSkeleton />;
+  }
+
+  if (pricesError) {
+    toast.error("Error loading cryptocurrency prices. Please try again later.");
+    console.error("Error loading prices:", pricesError);
+  }
+
   const truncateAddress = (address) => {
     if (!address) return "";
     return `${address.slice(0, 11)}...${address.slice(-6)}`;
   };
 
   console.log("Number of donations", numOfDonations);
+  console.log("donationEvents", donationEvents);
 
   console.log("profile here", profile);
 
@@ -246,7 +285,7 @@ const UserProfile = () => {
                 <div className="social-icons">
                   {profile.twitter_link && (
                     <a
-                      href={`https://${profile.twitter_link}`}
+                      href={`${profile.twitter_link}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -262,18 +301,46 @@ const UserProfile = () => {
                       <FaSpotify size={30} />
                     </a>
                   )}
+                  {profile.website_link && (
+                    <a
+                      href={`${profile.website_link}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FaGlobe size={30} />
+                    </a>
+                  )}
                   {profile.youtube_link && (
                     <a
-                      href={`https://${profile.youtube_link}`}
+                      href={`${profile.youtube_link}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       <FaYoutube size={30} />
                     </a>
                   )}
+                  {profile.instagram_link && (
+                    <a
+                      href={`${profile.instagram_link}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FaInstagram size={30} />
+                    </a>
+                  )}
+                  {profile.patreon_link && (
+                    <a
+                      href={`${profile.patreon_link}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FaPatreon size={30} />
+                    </a>
+                  )}
+
                   {profile.dribble_link && (
                     <a
-                      href={`https://${profile.dribble_link}`}
+                      href={`${profile.dribble_link}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -283,7 +350,7 @@ const UserProfile = () => {
                 </div>
               </div>
               <div className="supporters">
-                <span>{numOfDonations} supporters</span>
+                <span>{numOfDonations} {numOfDonations === 1 ? 'supporter' : 'supporters'}</span>
               </div>
             </div>
           </div>

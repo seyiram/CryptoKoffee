@@ -39,11 +39,11 @@ body, html {
 }
 
 .app {
-  display: flex; /* This makes sure that Sidebar and main content are side by side */
-  height: 100vh; /* Full viewport height */
+  display: flex;
+  height: 100vh;
 }
 
 .main-content {
-  flex: 1; /* Takes remaining space after sidebar */
-  overflow-y: auto; /* If you want scrolling */
+  flex: 1;
+  overflow-y: auto; 
 }

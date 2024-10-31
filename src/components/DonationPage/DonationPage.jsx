@@ -196,7 +196,7 @@ const DonationPage = () => {
       username: state.displayName,
       avatar: state.profilePicture, // S3 URL
       short_bio: state.bio,
-      twitter_link: state.twittrLink,
+      twitter_link: state.twitterLink,
       instagram_link: state.instagramLink,
       youtube_link: state.youtubeLink,
       website_link: state.websiteLink,
