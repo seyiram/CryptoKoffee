@@ -1,5 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { FaSearch, FaCopy, FaCoins, FaInbox, FaSpinner, FaWallet } from "react-icons/fa";
+import React, { useEffect, useState, useMemo } from "react";
+import {
+  FaSearch,
+  FaCopy,
+  FaCoins,
+  FaInbox,
+  FaSpinner,
+  FaWallet,
+} from "react-icons/fa";
 import { toast } from "react-toastify";
 import "./TransactionHistory.css";
 import { useWallet } from "../../contexts/WalletContext";
@@ -10,7 +17,8 @@ import debounce from "lodash/debounce";
 import TransactionHistorySkeleton from "../../skeleton-loaders/TransactionHistorySkeleton";
 
 const TransactionHistory = () => {
-  const [filteredDonations, setFilteredDonations] = useState([]);
+  // const [filteredDonations, setFilteredDonations] = useState([]);
+
   const [balance, setBalance] = useState("0.00");
   const [filter, setFilter] = useState("All time");
   const [sortOrder, setSortOrder] = useState("Recent");
@@ -19,6 +27,54 @@ const TransactionHistory = () => {
   // Use WalletContext and React Query for wallet information and donation data
   const { account, network, provider, isConnected } = useWallet();
   const { data: donations = [], isLoading } = useDonationEvents(account);
+
+  const filteredDonations = useMemo(() => {
+    let filtered = [...donations];
+    const now = new Date();
+
+    switch (filter) {
+      case "Today":
+        filtered = filtered.filter(
+          (donation) =>
+            new Date(donation.timeStamp) >
+            new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        );
+        break;
+      case "This week":
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        filtered = filtered.filter(
+          (donation) => new Date(donation.timeStamp) > startOfWeek
+        );
+        break;
+      case "This month":
+        filtered = filtered.filter(
+          (donation) =>
+            new Date(donation.timeStamp) >
+            new Date(now.getFullYear(), now.getMonth(), 1)
+        );
+        break;
+      default:
+        break;
+    }
+
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (donation) =>
+          donation.donor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          donation.amount.toString().includes(searchTerm) ||
+          donation.recipient.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.timeStamp);
+      const dateB = new Date(b.timeStamp);
+      return sortOrder === "Recent" ? dateB - dateA : dateA - dateB;
+    });
+
+    return filtered;
+  }, [filter, donations, searchTerm, sortOrder]);
 
   // Fetch wallet balance
   useEffect(() => {
@@ -41,66 +97,28 @@ const TransactionHistory = () => {
     fetchBalance();
   }, [account, isConnected, provider]);
 
-  useEffect(() => {
-    filterAndSortDonations(filter, searchTerm, sortOrder);
-  }, [filter, donations, searchTerm, sortOrder]);
+  const debouncedSetSearchTerm = useMemo(
+    () =>
+      debounce((value) => {
+        setSearchTerm(value);
+      }, 300),
+    []
+  );
 
-  const filterAndSortDonations = (period, search, sort) => {
-    let filtered = [...donations];
-    const now = new Date();
-    
-    // Apply time filter
-    switch (period) {
-      case "Today":
-        filtered = filtered.filter(
-          (donation) =>
-            new Date(donation.timeStamp) >
-            new Date(now.getFullYear(), now.getMonth(), now.getDate())
-        );
-        break;
-      case "This week":
-        const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-        filtered = filtered.filter(
-          (donation) => new Date(donation.timeStamp) > startOfWeek
-        );
-        break;
-      case "This month":
-        filtered = filtered.filter(
-          (donation) =>
-            new Date(donation.timeStamp) >
-            new Date(now.getFullYear(), now.getMonth(), 1)
-        );
-        break;
-      default:
-        break;
-    }
-
-    // Apply search filter
-    if (search) {
-      filtered = filtered.filter(
-        (donation) =>
-          donation.donor.toLowerCase().includes(search.toLowerCase()) ||
-          donation.amount.toString().includes(search) ||
-          donation.recipient.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
-    // Apply sorting
-    filtered.sort((a, b) => {
-      const dateA = new Date(a.timeStamp);
-      const dateB = new Date(b.timeStamp);
-      return sort === "Recent" ? dateB - dateA : dateA - dateB;
-    });
-
-    setFilteredDonations(filtered);
+  const handleSearchChange = (event) => {
+    debouncedSetSearchTerm(event.target.value);
   };
 
-  const handleSearchChange = debounce((event) => {
-    setSearchTerm(event.target.value);
-  }, 300);
+  // Cleanup the debounce function on unmount
+  useEffect(() => {
+    return () => {
+      debouncedSetSearchTerm.cancel?.();
+    };
+  }, [debouncedSetSearchTerm]);
 
   const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text)
+    navigator.clipboard
+      .writeText(text)
       .then(() => {
         toast.success("Address copied to clipboard!");
       })
@@ -111,7 +129,11 @@ const TransactionHistory = () => {
 
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
-    return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return (
+      date.toLocaleDateString() +
+      " " +
+      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    );
   };
 
   // Get network currency using shared utility
@@ -170,8 +192,8 @@ const TransactionHistory = () => {
               <FaSearch className="search-icon" />
             </div>
             <div className="filters-group">
-              <select 
-                className="filter-select" 
+              <select
+                className="filter-select"
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
               >
@@ -180,7 +202,7 @@ const TransactionHistory = () => {
                 <option value="This week">This week</option>
                 <option value="This month">This month</option>
               </select>
-              <select 
+              <select
                 className="filter-select"
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value)}
@@ -196,21 +218,22 @@ const TransactionHistory = () => {
         <div className="table-section">
           <div className="table-header">
             <h2 className="table-title">
-              <FaCoins style={{ marginRight: '0.5rem', color: '#f79e61' }} />
+              <FaCoins style={{ marginRight: "0.5rem", color: "#f79e61" }} />
               Transaction History
             </h2>
             <span className="donations-count">
-              {filteredDonations.length} transaction{filteredDonations.length !== 1 ? 's' : ''}
+              {filteredDonations.length} transaction
+              {filteredDonations.length !== 1 ? "s" : ""}
             </span>
           </div>
-          
+
           <div className="table-container">
             {filteredDonations.length === 0 ? (
               <div className="empty-state">
                 <FaInbox className="empty-icon" />
                 <h3 className="empty-title">No donations found</h3>
                 <p className="empty-description">
-                  {searchTerm || filter !== "All time" 
+                  {searchTerm || filter !== "All time"
                     ? "Try adjusting your search or filter criteria to see more results."
                     : "You haven't received any donations yet. Share your profile to start receiving support!"}
                 </p>
@@ -233,7 +256,7 @@ const TransactionHistory = () => {
                           <span className="address-text">
                             {truncateAddress(donation.donor)}
                           </span>
-                          <button 
+                          <button
                             className="copy-btn"
                             onClick={() => copyToClipboard(donation.donor)}
                             title="Copy address"
@@ -245,7 +268,9 @@ const TransactionHistory = () => {
                       <td>
                         <span className="amount-cell">
                           {Number(donation.amount).toFixed(6)}
-                          <span className="amount-currency">{networkCurrency}</span>
+                          <span className="amount-currency">
+                            {networkCurrency}
+                          </span>
                         </span>
                       </td>
                       <td>
@@ -253,7 +278,7 @@ const TransactionHistory = () => {
                           <span className="address-text">
                             {truncateAddress(donation.recipient)}
                           </span>
-                          <button 
+                          <button
                             className="copy-btn"
                             onClick={() => copyToClipboard(donation.recipient)}
                             title="Copy address"
