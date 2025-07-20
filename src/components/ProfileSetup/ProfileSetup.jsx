@@ -8,6 +8,7 @@ import {
   FaYoutube,
   FaGlobe,
   FaPatreon,
+  FaCopy,
 } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 import { ethers } from "ethers";
@@ -17,7 +18,7 @@ import { toast } from "react-toastify";
 
 import { S3, HeadObjectCommand } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
-import { PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { PutItemCommand, QueryCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import { dynamodb } from "../../utils/aws";
 import { useWallet } from "../../contexts/WalletContext";
@@ -35,6 +36,8 @@ const s3 = new S3({
 const ProfileSetup = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [isProfileSaved, setIsProfileSaved] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
+  const [saveStatus, setSaveStatus] = React.useState(null); // 'success', 'error', null
   const [errors, setErrors] = React.useState({});
   const [isUploading, setIsUploading] = React.useState(false);
   const [isDragOver, setIsDragOver] = React.useState(false);
@@ -46,7 +49,7 @@ const ProfileSetup = () => {
   const { account, connectWallet } = useWallet();
   const queryClient = useQueryClient();
   
-  // Use React Query for user profile
+  // React Query for user profile
   const userId = account ? `user-${ethers.getAddress(account)}` : null;
   const { 
     data: profile, 
@@ -95,6 +98,23 @@ const ProfileSetup = () => {
       });
     }
   }, [profile]);
+
+  // Dirty state detection
+  const isFormDirty = React.useMemo(() => {
+    if (!profile) return false;
+    // Compare each field in state to profile
+    return (
+      (state.displayName !== (profile.username || "")) ||
+      (state.bio !== (profile.short_bio || "")) ||
+      (state.text !== (profile.custom_message || "")) ||
+      (state.profilePicture !== (profile.avatar || null)) ||
+      (state.twitterLink !== (profile.twitter_link || "")) ||
+      (state.instagramLink !== (profile.instagram_link || "")) ||
+      (state.youtubeLink !== (profile.youtube_link || "")) ||
+      (state.websiteLink !== (profile.website_link || "")) ||
+      (state.patreonLink !== (profile.patreon_link || ""))
+    );
+  }, [state, profile]);
 
   // Form validation
   const validateField = (fieldName, value) => {
@@ -188,20 +208,20 @@ const ProfileSetup = () => {
         
         timeoutId = setTimeout(async () => {
           try {
-            // Check if username is taken by looking for existing profile
-            const response = await fetch(`/api/check-username/${username}`);
-            if (response.ok) {
-              const data = await response.json();
-              setUsernameStatus(data.available ? 'available' : 'taken');
-            } else {
-              // Fallback: simulate check (in real app, this would be an API call)
-              const isAvailable = Math.random() > 0.3; // 70% chance it's available
-              setUsernameStatus(isAvailable ? 'available' : 'taken');
-            }
+            // Query DynamoDB for username using GSI
+            const params = {
+              TableName: "UserProfiles",
+              IndexName: "username-index", 
+              KeyConditionExpression: "username = :u",
+              ExpressionAttributeValues: {
+                ":u": { S: username }
+              }
+            };
+            const result = await dynamodb.send(new QueryCommand(params));
+            setUsernameStatus(result.Count === 0 ? 'available' : 'taken');
           } catch (error) {
             console.error('Error checking username:', error);
-            // In case of error, assume it's available
-            setUsernameStatus('available');
+            setUsernameStatus('unknown');
           } finally {
             setIsCheckingUsername(false);
           }
@@ -235,7 +255,7 @@ const ProfileSetup = () => {
     
     const files = e.dataTransfer.files;
     if (files.length > 0) {
-      // Create a synthetic event to match the file input onChange handler
+      // Synthetic event to match the file input onChange handler
       const syntheticEvent = {
         target: {
           files: [files[0]]
@@ -268,7 +288,7 @@ const ProfileSetup = () => {
     setIsUploading(true);
     
     return new Promise((resolve) => {
-      // Create a temporary URL for the file
+      // Temporary URL for the file
       const imageUrl = URL.createObjectURL(file);
       dispatch({ type: "SET_PROFILE_PICTURE", payload: imageUrl });
 
@@ -454,7 +474,7 @@ const ProfileSetup = () => {
   // Show wallet connection prompt if not connected
   if (!account) {
     return (
-      <div className="donation-page">
+      <div className="profile-setup-page">
         <div className="wallet-not-connected">
           <h2>Connect Your Wallet</h2>
           <p>Please connect your wallet to create or edit your donation page.</p>
@@ -465,14 +485,14 @@ const ProfileSetup = () => {
   }
 
   return (
-    <div className="donation-page">
-      <div className="donation-link-container">
-        <div className="donation-link">
-          <h2>Donation Page</h2>
-          <span className="donation-label">Donation link (your page)</span>
+    <div className="profile-setup-page">
+      <div className="profile-setup-header-container">
+        <div className="profile-setup-header">
+          <h2>Profile Setup</h2>
+          <span className="profile-setup-label">Donation link (your page)</span>
           <div className="input-group">
             <div className="input-container">
-              <span className="donation-link-prefix">
+              <span className="profile-setup-link-prefix">
                 cryptokoffee.com/donate/
               </span>
               <input
@@ -487,12 +507,17 @@ const ProfileSetup = () => {
                 {usernameStatus === 'available' && <span className="available-small">✓</span>}
                 {usernameStatus === 'taken' && <span className="taken-small">✗</span>}
               </div>
-              <GoCopy
+              <button
                 onClick={() => navigator.clipboard.writeText(`cryptokoffee.com/donate/${state.displayName}`)}
                 className="icon copy-icon"
-              />
+                type="button"
+                title="Copy link"
+              >
+                <FaCopy />
+              </button>
             </div>
-            {isProfileSaved || profile ? (
+            {/* Update Visit Page button logic */}
+            {(isProfileSaved || profile) && !isFormDirty ? (
               <button
                 className="visit-page-btn"
                 value={state.link}
@@ -709,7 +734,17 @@ const ProfileSetup = () => {
             </div>
           </div>
 
-          {/* Action Buttons */}
+          {/* Save Status Message */}
+          {saveStatus === 'success' && (
+            <div className="save-status success">
+              ✓ Profile saved successfully!
+            </div>
+          )}
+          {saveStatus === 'error' && (
+            <div className="save-status error">
+              ✗ Error saving profile. Please try again.
+            </div>
+          )}
           <div className="form-actions">
             <button className="cancel-btn" onClick={() => navigate("/")}>
               Cancel

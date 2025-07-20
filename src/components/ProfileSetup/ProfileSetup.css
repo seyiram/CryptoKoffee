@@ -1,17 +1,17 @@
-.donation-page {
+.profile-setup-page {
   background-color: #f4f6f9;
   padding: 1.25rem;
   font-family: "GT Walsheim Pro", sans-serif;
 }
 
-.donation-link-container {
+.profile-setup-header-container {
   width: 100%;
   display: flex;
   justify-content: center;
   margin-top: 3rem;
 }
 
-.donation-link {
+.profile-setup-header {
   background: #fff;
   padding: 2rem;
   border-radius: 0.5rem;
@@ -20,65 +20,108 @@
   margin-bottom: 1rem;
 }
 
-.donation-link h2 {
+.profile-setup-header h2 {
   margin-bottom: 1.25rem;
 }
 
-.donation-link .donation-label {
+.profile-setup-header .profile-setup-label {
   margin-top: 1.5rem;
   font-size: 1rem;
   color: #191e28;
 }
 
-.donation-link-prefix{
-  color: #000;
-  background-color: #e6e6e6;
+.profile-setup-link-prefix {
+  color: #666;
+  background-color: #f8f9fa;
   padding: 0.875rem;
-  width: 100%;
-  max-width: 14.688rem;
   border-right: 0.0625rem solid #ccc;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 0.9rem;
+  flex-shrink: 0;
 }
 
-.donation-link .input-group {
+.profile-setup-header .input-group {
   display: flex;
   align-items: center;
   position: relative;
   margin-top: 0.5rem;
 }
 
-.donation-link .input-container {
+.profile-setup-header .input-container {
   border: 0.0625rem solid #ccc;
   border-radius: 0.25rem;
   width: 100%;
   max-width: 35rem;
+  display: flex;
+  align-items: center;
+  background: white;
+  overflow: hidden;
 }
 
-.donation-link .input-group input {
-  padding: 0.75rem;
-  margin-right: 0.3125rem;
+.profile-setup-header .input-group input {
+  padding: 0.875rem;
   border: none;
-  width: 100%;
-  /* margin-top: 0.5rem; */
   flex-grow: 1;
   font-size: 1rem;
+  background: transparent;
+  min-width: 0;
 }
 
-.donation-link .input-group input:focus {
+.profile-setup-header .input-group input:focus {
   outline: none;
+}
+
+.profile-setup-header .input-container:focus-within {
   border-color: #f79e61;
+  box-shadow: 0 0 0 2px rgba(247, 158, 97, 0.2);
 }
 
-.donation-link .copy-icon {
+.profile-setup-header .input-group input.error {
+  background-color: #fef2f2;
+}
+
+.profile-setup-header .link-status {
+  padding: 0 0.5rem;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.checking-small {
+  color: #ffc107;
+}
+
+.available-small {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.taken-small {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.profile-setup-header .copy-icon,
+.profile-setup-header .icon.copy-icon {
   cursor: pointer;
-  margin-right: 0.5rem;
-  width: 3rem;
+  padding: 0.875rem;
+  color: #666;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+  border-left: 1px solid #e0e0e0;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.donation-link .copy-icon:hover,
-.donation-link .copy-icon:focus {
+.profile-setup-header .copy-icon:hover,
+.profile-setup-header .copy-icon:focus,
+.profile-setup-header .icon.copy-icon:hover,
+.profile-setup-header .icon.copy-icon:focus {
   color: #f79e61;
 }
 
@@ -344,7 +387,7 @@
   font-weight: bold;
 }
 
-.donation-link .input-container {
+.profile-setup-header .input-container {
   display: flex;
   align-items: center;
 }
@@ -607,15 +650,15 @@
 
 /* Media Queries for mobile responsiveness */
 @media (max-width: 48rem) {
-  .donation-link .input-group {
+  .profile-setup-header .input-group {
     flex-direction: column;
   }
 
-  .donation-link .input-group input {
+  .profile-setup-header .input-group input {
     width: 100%;
   }
 
-  .donation-link-prefix {
+  .profile-setup-header-prefix {
     font-size: 0.8rem;
     max-width: 100%;
     display: inline-block;
@@ -660,17 +703,17 @@
 }
 
 @media (max-width: 64rem) {
-  .donation-page {
+  .profile-setup-page {
     margin-top: 4rem;
   }
-  .donation-link .input-container {
+  .profile-setup-header .input-container {
     padding-right: 0;
   }
  
 }
 
 @media (max-width: 30rem) {
-  .donation-link-prefix {
+  .profile-setup-header-prefix {
     font-size: 0.75rem; 
   }
 }
