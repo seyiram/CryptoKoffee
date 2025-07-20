@@ -1,160 +1,788 @@
+/* Modern Withdraw Component Styles */
 .withdraw-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #f4f6f9;
-  padding: 20px;
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding: 2rem 1rem;
+  font-family: "GT Walsheim Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .withdraw-container {
-  width: 100%;
-  padding: 20px;
-  margin: 40px auto;
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.withdraw-container h2 {
-  margin-bottom: 20px;
-  color: #333;
+/* Header */
+.withdraw-header {
+  margin-bottom: 2rem;
+}
+
+/* Network Warning */
+.network-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  color: #dc2626;
+}
+
+.network-warning svg {
+  font-size: 1.25rem;
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}
+
+.network-warning strong {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.network-warning p {
+  margin: 0;
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+/* Loading States */
+.loading-history {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+.loading-history .spinner {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.header-icon {
+  font-size: 2rem;
+  color: #f79e61;
+  background: rgba(247, 158, 97, 0.1);
+  padding: 1rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  flex-shrink: 0;
 }
 
 .withdraw-title {
-  font-size: 24px;
+  font-size: 2rem;
+  font-weight: 700;
   color: #333;
-  margin-bottom: 20px;
+  margin: 0;
 }
 
-.withdraw-coin,
-.withdraw-balance,
-.withdraw-input,
-.withdrawal-history {
-  margin-bottom: 20px;
+.withdraw-subtitle {
+  color: #666;
+  margin: 0.5rem 0 0 0;
+  font-size: 1rem;
 }
 
-.withdraw-coin label,
-.withdraw-balance label,
-.withdraw-input label {
-  display: block;
-  margin-bottom: 5px;
-  color: #333;
-  font-weight: bold;
+/* Content Grid */
+.withdraw-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
 }
 
-.coin-selector {
-  width: 40%;
+/* Balance Card */
+.balance-card {
+  background: linear-gradient(135deg, #f79e61 0%, #e67e22 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(247, 158, 97, 0.3);
+  grid-column: 1 / -1;
 }
 
-.coin-selector select {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #fff;
+.balance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.balance-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+.network-badge {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.9rem;
+  backdrop-filter: blur(10px);
 }
 
-.withdraw-balance span {
-  display: block;
-  margin-top: 5px;
-  color: #555;
-}
-
-.withdraw-input .input-with-icon {
+.coin-icon-small {
   display: flex;
   align-items: center;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  overflow: hidden;
-  width: 100%;
-  max-width: 40%;
+  justify-content: center;
+  font-size: 20px;
 }
 
-.withdraw-input input {
-  flex: 1;
-  padding: 10px;
-  border: none;
+.coin-icon-small-svg {
+  width: 20px;
+  height: 20px;
 }
 
-.withdraw-input .icon {
-  padding: 10px;
-  background-color: #eee;
+.balance-amount {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.amount-large {
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.amount-currency {
+  font-size: 1.5rem;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.balance-usd {
+  font-size: 1.1rem;
+  opacity: 0.8;
+}
+
+/* Coin Selection Card */
+.coin-selection-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+}
+
+.coin-selection-card h3 {
+  margin: 0 0 1.5rem 0;
+  color: #333;
+  font-size: 1.3rem;
+}
+
+.coin-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.coin-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 0.75rem;
   cursor: pointer;
-  border: none;
-  display: flex;
-  align-items: center;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
 }
 
-.withdraw-input .input-with-icon input:hover,
-.withdraw-input .input-with-icon input:focus {
+.coin-option:hover {
+  border-color: #f79e61;
+  background: rgba(247, 158, 97, 0.05);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(247, 158, 97, 0.2);
+}
+
+.coin-option.selected {
+  border-color: #f79e61;
+  background: rgba(247, 158, 97, 0.1);
+  box-shadow: 0 4px 12px rgba(247, 158, 97, 0.2);
+}
+
+.coin-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: #666;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.coin-icon-svg {
+  width: 32px;
+  height: 32px;
+  transition: transform 0.2s ease;
+}
+
+.coin-option:hover .coin-icon {
+  transform: scale(1.1);
+}
+
+.coin-option:hover .coin-icon-svg {
+  transform: scale(1.1);
+}
+
+.coin-option.selected .coin-icon {
+  transform: scale(1.15);
+  color: #f79e61;
+}
+
+.coin-option.selected .coin-icon-svg {
+  transform: scale(1.15);
+}
+
+.coin-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.coin-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+}
+
+.coin-network {
+  color: #666;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+/* Withdrawal Form Card */
+.withdrawal-form-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+}
+
+.withdrawal-form-card h3 {
+  margin: 0 0 1.5rem 0;
+  color: #333;
+  font-size: 1.3rem;
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 2px solid #e9ecef;
+  border-radius: 0.75rem;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.input-container:focus-within {
+  border-color: #f79e61;
+  box-shadow: 0 0 0 3px rgba(247, 158, 97, 0.1);
+}
+
+.input-container.error {
+  border-color: #dc3545;
+}
+
+.address-input,
+.amount-input {
+  flex: 1;
+  padding: 1rem;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #333;
+}
+
+.address-input:focus,
+.amount-input:focus {
   outline: none;
+}
+
+.paste-btn {
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  border: none;
+  border-left: 1px solid #e9ecef;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px;
+}
+
+.paste-btn:hover {
+  background: #f79e61;
+  color: white;
+}
+
+.currency-label {
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  border-left: 1px solid #e9ecef;
+  color: #666;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.error-message {
+  display: block;
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+/* Amount Presets */
+.amount-presets {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.preset-btn {
+  flex: 1;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  color: #666;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.preset-btn:hover {
+  border-color: #f79e61;
+  background: rgba(247, 158, 97, 0.1);
+  color: #f79e61;
+}
+
+/* Transaction Summary */
+.transaction-summary {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  margin: 1.5rem 0;
+  border: 1px solid #e9ecef;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.summary-row.total {
+  border-top: 2px solid #e9ecef;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  font-weight: 700;
+  color: #333;
+  font-size: 1rem;
+}
+
+/* Withdraw Button */
+.withdraw-button {
+  width: 100%;
+  padding: 1.25rem;
+  background: #000;
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.withdraw-button:hover:not(:disabled) {
+  background: #f79e61;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(247, 158, 97, 0.4);
+}
+
+.withdraw-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* History Card */
+.history-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  grid-column: 1 / -1;
+  margin-top: 1rem;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 2rem 1rem 2rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.history-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #333;
+}
+
+.history-title h3 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.history-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.filter-btn,
+.search-btn {
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-btn:hover,
+.search-btn:hover {
+  background: #f79e61;
+  color: white;
   border-color: #f79e61;
 }
 
-.withdraw-input .icon:hover {
-  background-color: #ddd;
+.history-content {
+  padding: 1rem 2rem 2rem 2rem;
 }
 
-.withdraw-button {
-  width: 40%;
-  padding: 15px;
-  background-color: #000;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
+/* History List */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 0.75rem;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.history-item:hover {
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.tx-icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(247, 158, 97, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f79e61;
+  flex-shrink: 0;
+}
+
+.tx-details {
+  flex: 1;
+}
+
+.tx-amount {
+  font-weight: 700;
+  color: #333;
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+}
+
+.tx-address {
+  color: #666;
+  font-size: 0.9rem;
+  font-family: "Monaco", "Menlo", monospace;
+}
+
+.tx-status {
+  text-align: right;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.status-badge.confirmed {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+}
+
+.status-badge.pending {
+  background: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+}
+
+.status-badge.failed {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+.tx-date {
+  color: #999;
+  font-size: 0.85rem;
+}
+
+/* Empty History */
+.empty-history {
   text-align: center;
-  transition: box-shadow 0.2s ease, transform 0.2s ease,
-    background-color 0.2s ease, color 0.2s ease;
+  padding: 3rem 2rem;
+  color: #666;
 }
 
-.withdraw-button:hover {
-  background-color: #f79e61;
-  box-shadow: 0.25rem 0.25rem 0rem #000;
-  transform: translate(-0.25rem, -0.25rem);
-}
-
-.withdrawal-history {
-  margin-top: 3em;
-}
-.withdrawal-history h2 {
+.empty-icon {
+  font-size: 3rem;
+  color: #ddd;
   margin-bottom: 1rem;
-  color: #333;
 }
 
-.withdrawal-history table {
-  width: 100%;
-  border-collapse: collapse;
+.empty-history p {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
 }
 
-.withdrawal-history th,
-.withdrawal-history td {
-  padding: 10px;
-  text-align: left;
-  border-bottom: 1px solid #ccc;
+.empty-history span {
+  font-size: 0.9rem;
+  color: #999;
 }
 
-.withdrawal-history th {
-  background-color: #f4f4f4;
-  color: #333;
-}
-
-.withdrawal-history td {
-  color: #555;
-}
-
-/* Media Queries for mobile responsiveness */
-@media (max-width: 768px) {
-  .withdraw-container {
-    padding: 10px;
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+  .withdraw-content {
+    grid-template-columns: 1fr;
   }
+  
+  .balance-card {
+    grid-column: 1;
+  }
+  
+  .history-card {
+    grid-column: 1;
+  }
+}
 
-  .withdraw-input .input-with-icon,
+@media (max-width: 768px) {
+  .withdraw-page {
+    padding: 1rem 0.5rem;
+  }
+  
+  .header-content {
+    padding: 1.5rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+  
+  .header-icon {
+    font-size: 1.5rem;
+    padding: 0.75rem;
+  }
+  
+  .withdraw-title {
+    font-size: 1.5rem;
+  }
+  
+  .amount-large {
+    font-size: 2rem;
+  }
+  
+  .balance-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .coin-selection-card,
+  .withdrawal-form-card,
+  .balance-card {
+    padding: 1.5rem;
+  }
+  
+  .history-header {
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .history-content {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+  }
+  
+  .history-item {
+    padding: 1rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .tx-status {
+    text-align: center;
+  }
+  
+  .amount-presets {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .coin-grid {
+    gap: 0.5rem;
+  }
+  
+  .coin-option {
+    padding: 0.75rem;
+  }
+  
+  .coin-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .transaction-summary {
+    padding: 1rem;
+  }
+  
+  .empty-history {
+    padding: 2rem 1rem;
+  }
+}
+
+/* Focus States for Accessibility */
+.coin-option:focus,
+.preset-btn:focus,
+.withdraw-button:focus,
+.filter-btn:focus,
+.search-btn:focus {
+  outline: 2px solid #f79e61;
+  outline-offset: 2px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .balance-card {
+    background: #000;
+    color: #fff;
+  }
+  
   .withdraw-button {
-    width: 100%;
-    max-width: 100%;
+    background: #000;
+    border: 2px solid #fff;
+  }
+  
+  .coin-option {
+    border-color: #000;
+  }
+  
+  .coin-option:hover,
+  .coin-option.selected {
+    background: #000;
+    color: #fff;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

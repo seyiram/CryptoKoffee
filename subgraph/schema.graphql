@@ -1,0 +1,99 @@
+type Donation @entity(immutable: true) {
+  id: ID!
+  amount: BigInt!
+  donor: Bytes!
+  recipient: Bytes!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  
+  # Relationships
+  donorProfile: DonorProfile
+  recipientProfile: RecipientProfile
+}
+
+type DonorProfile @entity(immutable: false) {
+  id: ID! # donor address
+  address: Bytes!
+  totalDonated: BigInt!
+  donationCount: Int!
+  firstDonationTimestamp: BigInt!
+  lastDonationTimestamp: BigInt!
+  
+  # Relationships
+  donations: [Donation!]! @derivedFrom(field: "donorProfile")
+}
+
+type RecipientProfile @entity(immutable: false) {
+  id: ID! # recipient address
+  address: Bytes!
+  totalReceived: BigInt!
+  donationCount: Int!
+  firstDonationTimestamp: BigInt!
+  lastDonationTimestamp: BigInt!
+  uniqueDonorCount: Int!
+  
+  # Relationships
+  donations: [Donation!]! @derivedFrom(field: "recipientProfile")
+  topDonors: [DonorSummary!]! @derivedFrom(field: "recipient")
+}
+
+type DonorSummary @entity(immutable: false) {
+  id: ID! # recipient-donor composite key
+  donor: Bytes!
+  recipient: RecipientProfile!
+  totalAmount: BigInt!
+  donationCount: Int!
+  firstDonationTimestamp: BigInt!
+  lastDonationTimestamp: BigInt!
+}
+
+type WalletInfo @entity(immutable: false) {
+  id: ID! # wallet address
+  walletAddress: Bytes!
+  currentBalance: BigInt!
+  numOfDonations: Int!
+  lastUpdated: BigInt!
+}
+
+type Payment @entity(immutable: true) {
+  id: ID!
+  amount: BigInt!
+  timestamp: BigInt!
+  sender: Bytes!
+  recipient: Bytes!
+  description: String!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+type GlobalStats @entity(immutable: false) {
+  id: ID! # Always "global"
+  totalDonations: BigInt!
+  totalDonationCount: Int!
+  totalUniqueRecipients: Int!
+  totalUniqueDonors: Int!
+  lastUpdated: BigInt!
+}
+
+# Daily aggregations for analytics
+type DailyStats @entity(immutable: false) {
+  id: ID! # Date in YYYY-MM-DD format
+  date: String!
+  totalDonations: BigInt!
+  donationCount: Int!
+  uniqueDonors: Int!
+  uniqueRecipients: Int!
+  averageDonation: BigInt!
+}
+
+# Monthly aggregations  
+type MonthlyStats @entity(immutable: false) {
+  id: ID! # Date in YYYY-MM format
+  month: String!
+  totalDonations: BigInt!
+  donationCount: Int!
+  uniqueDonors: Int!
+  uniqueRecipients: Int!
+  averageDonation: BigInt!
+}

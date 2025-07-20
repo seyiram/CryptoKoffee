@@ -11,5 +11,12 @@ export default defineConfig({
     mimeTypes: {
       "application/javascript": ["js"],
     },
+    hmr: {
+      overlay: true,
+    },
+    watch: {
+      usePolling: true,
+      interval: 100,
+    },
   },
 });

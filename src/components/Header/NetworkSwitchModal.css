@@ -1,47 +1,331 @@
-.modal-overlay {
+/* Network Switch Modal */
+.network-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-}
-
-.modal-content {
-  background-color: white;
   padding: 20px;
-  border-radius: 5px;
-  max-width: 400px;
-  width: 100%;
 }
 
-.modal-buttons {
+.network-modal-content {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Header */
+.network-modal-header {
   display: flex;
   justify-content: space-between;
-  margin-top: 20px;
+  align-items: flex-start;
+  padding: 24px 24px 20px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.modal-buttons button {
-  padding: 10px 20px;
+.network-modal-title-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.warning-icon {
+  color: #f59e0b;
+  font-size: 24px;
+  margin-top: 2px;
+}
+
+.network-modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.3;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.close-button {
+  background: none;
   border: none;
-  border-radius: 5px;
+  font-size: 20px;
+  color: #9ca3af;
   cursor: pointer;
-  transition: background-color 0.3s;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.modal-buttons button:first-child {
-  background-color: #000;
+.close-button:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.close-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Body */
+.network-modal-body {
+  padding: 20px 24px;
+}
+
+.description {
+  margin: 0 0 20px;
+  color: #4b5563;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+/* Networks List */
+.networks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.network-option {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.network-option:hover:not(:disabled) {
+  border-color: #f79e61;
+  background-color: #fef7f0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(247, 158, 97, 0.15);
+}
+
+.network-option:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.network-option.recommended {
+  border-color: #f79e61;
+  background: linear-gradient(135deg, #fef7f0 0%, #ffffff 100%);
+  position: relative;
+}
+
+.network-option.recommended::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #f79e61, #e67e22);
+}
+
+.network-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background-color: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.network-icon img {
+  width: 28px;
+  height: 28px;
+}
+
+.network-info {
+  flex: 1;
+}
+
+.network-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.recommended-badge {
+  background: linear-gradient(135deg, #f79e61, #e67e22);
   color: white;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.modal-buttons button:last-child {
-  background-color: #ccc;
+.network-description {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 8px;
 }
 
-.modal-buttons button:hover {
-  opacity: 0.8;
+.network-details {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+}
+
+.currency {
+  color: #059669;
+  font-weight: 600;
+  background-color: #ecfdf5;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.chain-id {
+  color: #7c3aed;
+  font-weight: 500;
+}
+
+.network-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.switch-icon {
+  color: #10b981;
+  font-size: 20px;
+}
+
+.loading-spinner {
+  color: #f79e61;
+  font-size: 18px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Footer */
+.network-modal-footer {
+  padding: 16px 24px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: center;
+}
+
+.cancel-button {
+  background: none;
+  border: 1px solid #d1d5db;
+  color: #6b7280;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-button:hover:not(:disabled) {
+  border-color: #9ca3af;
+  color: #374151;
+  background-color: #f9fafb;
+}
+
+.cancel-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .network-modal-overlay {
+    padding: 16px;
+  }
+  
+  .network-modal-content {
+    max-width: 100%;
+  }
+  
+  .network-modal-header {
+    padding: 20px 20px 16px;
+  }
+  
+  .network-modal-body {
+    padding: 16px 20px;
+  }
+  
+  .network-modal-footer {
+    padding: 12px 20px 20px;
+  }
+  
+  .network-option {
+    padding: 14px;
+  }
+  
+  .network-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 12px;
+  }
+  
+  .network-icon img {
+    width: 24px;
+    height: 24px;
+  }
 }

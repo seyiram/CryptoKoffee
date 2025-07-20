@@ -1,0 +1,37 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  # Arbitrum Sepolia Testnet
+  - kind: ethereum
+    name: CryptoKoffeeArbitrumSepolia
+    network: arbitrum-sepolia
+    source:
+      address: "0x798FD171C49BBf345e50A512A638BC8B969153e9"
+      abi: CryptoKoffee
+      startBlock: 170000000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Donation
+        - DonorProfile
+        - RecipientProfile
+        - DonorSummary
+        - WalletInfo
+        - Payment
+        - GlobalStats
+        - DailyStats
+        - MonthlyStats
+      abis:
+        - name: CryptoKoffee
+          file: ./abis/CryptoKoffee.json
+      eventHandlers:
+        - event: DonationEvent(uint256,indexed address,indexed uint256,indexed address)
+          handler: handleDonationEvent
+        - event: WalletInfoEvent(address,uint256,uint256)
+          handler: handleWalletInfoEvent
+        - event: PaymentEvent(indexed uint256,indexed uint256,address,indexed address,string)
+          handler: handlePaymentEvent
+      file: ./src/mapping.ts

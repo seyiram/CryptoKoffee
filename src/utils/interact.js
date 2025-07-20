@@ -30,13 +30,29 @@ const getNetworkConfig = async () => {
   const network = await provider.getNetwork();
   const chainId = network.chainId;
 
+  console.log("Network Debug Info:", {
+    chainId: chainId.toString(),
+    polygonChainId: networkConfigs.polygonAmoy.chainId,
+    arbitrumChainId: networkConfigs.arbitrumSepolia.chainId,
+    networkName: network.name
+  });
+
   if (chainId === BigInt(networkConfigs.polygonAmoy.chainId)) {
     currentNetwork = "polygon";
+    console.log("Using Polygon network");
     return networkConfigs.polygonAmoy;
   } else if (chainId === BigInt(networkConfigs.arbitrumSepolia.chainId)) {
     currentNetwork = "arbitrumSepolia";
+    console.log("Using Arbitrum Sepolia network");
     return networkConfigs.arbitrumSepolia;
   } else {
+    console.error("Unsupported network detected:", {
+      chainId: chainId.toString(),
+      supportedNetworks: {
+        polygonAmoy: networkConfigs.polygonAmoy.chainId,
+        arbitrumSepolia: networkConfigs.arbitrumSepolia.chainId
+      }
+    });
     throw new Error(
       "Unsupported network. Please switch to Polygon or Arbitrum."
     );
@@ -84,6 +100,15 @@ export const getContract = async () => {
     currentNetwork === "polygon"
       ? contractAddressPolygon
       : contractAddressArbitrum;
+  
+  console.log("Contract Debug Info:", {
+    currentNetwork,
+    contractAddress,
+    hasAbi: !!CryptoKoffee.abi,
+    hasSigner: !!signer,
+    signerAddress: signer ? await signer.getAddress() : null
+  });
+  
   return new ethers.Contract(contractAddress, CryptoKoffee.abi, signer);
 };
 
@@ -133,35 +158,85 @@ export async function fetchDonationEventsForWallet(walletAddress, callback) {
     }
 
     // Create the filter for DonationEvent
-    const donationFilter = contract.filters.DonationEvent(
-      null,
-      null,
-      null,
-      walletAddress
+    // DonationEvent(uint amount, address indexed donor, uint indexed timeStamp, address indexed recipient)
+    // We want to filter for events where this wallet is either donor OR recipient
+    const donationFilterAsRecipient = contract.filters.DonationEvent(
+      null,      // amount (any)
+      null,      // donor (any) 
+      null,      // timeStamp (any)
+      walletAddress  // recipient (specific wallet)
+    );
+    
+    const donationFilterAsDonor = contract.filters.DonationEvent(
+      null,      // amount (any)
+      walletAddress,  // donor (specific wallet)
+      null,      // timeStamp (any)
+      null       // recipient (any)
     );
 
     // Fetch the latest block number to set a more specific range
     const latestBlock = await provider.getBlockNumber();
     const fromBlock = BlockRangeCalculator.calculate(latestBlock);
 
-    // Query the events using the filter
-    const events = await contract.queryFilter(
-      donationFilter,
-      fromBlock,
-      "latest"
-    );
+    // Use chunked requests to avoid timeouts
+    const chunks = BlockRangeCalculator.calculateChunks(fromBlock, latestBlock);
+    const allEvents = [];
+
+    for (const chunk of chunks) {
+      try {
+        // Fetch events where wallet is recipient
+        const eventsAsRecipient = await contract.queryFilter(
+          donationFilterAsRecipient,
+          chunk.fromBlock,
+          chunk.toBlock
+        );
+        
+        // Fetch events where wallet is donor
+        const eventsAsDonor = await contract.queryFilter(
+          donationFilterAsDonor,
+          chunk.fromBlock,
+          chunk.toBlock
+        );
+        
+        console.log(`Chunk ${chunk.fromBlock}-${chunk.toBlock}: Found ${eventsAsRecipient.length} as recipient, ${eventsAsDonor.length} as donor`);
+        allEvents.push(...eventsAsRecipient, ...eventsAsDonor);
+      } catch (chunkError) {
+        console.warn(`Failed to fetch chunk ${chunk.fromBlock}-${chunk.toBlock}:`, chunkError);
+        // Continue with other chunks even if one fails
+      }
+    }
+
+    console.log(`Total events found for wallet ${walletAddress}: ${allEvents.length}`);
+
+    // Debug raw event data
+    allEvents.forEach((event, index) => {
+      console.log(`Raw Event ${index}:`, {
+        amountWei: event.args.amount.toString(),
+        amountETH: ethers.formatEther(event.args.amount),
+        donor: event.args.donor,
+        recipient: event.args.recipient,
+        timestamp: event.args.timeStamp.toString()
+      });
+    });
 
     // Format the events
-    const formattedEvents = events.map((event) => ({
+    const formattedEvents = allEvents.map((event) => ({
       amount: ethers.formatEther(event.args.amount),
       donor: event.args.donor,
       timeStamp: new Date(Number(event.args.timeStamp.toString()) * 1000),
       recipient: event.args.recipient,
     }));
 
+    console.log("Formatted events after conversion:", formattedEvents);
+
+    // Filter for events where wallet is either recipient OR donor (case-insensitive)
     const filteredEvents = formattedEvents.filter(
-      (event) => event.recipient === walletAddress
+      (event) => 
+        event.recipient.toLowerCase() === walletAddress.toLowerCase() ||
+        event.donor.toLowerCase() === walletAddress.toLowerCase()
     );
+
+    console.log("Filtered events after wallet filtering:", filteredEvents);
 
     callback(filteredEvents); // Callback with the data
   } catch (error) {
@@ -176,12 +251,34 @@ export async function fetchDonationEventsForWallet(walletAddress, callback) {
 export async function fetchPaymentEvents(callback) {
   try {
     const contract = await getContract();
+    const networkConfig = await getNetworkConfig();
+    const provider = new ethers.JsonRpcProvider(networkConfig.rpcUrl);
+    
     const paymentFilter = contract.filters.PaymentEvent();
-    const events = await contract.queryFilter(paymentFilter, 0, "latest");
+    
+    // Fetch the latest block number to set a more specific range
+    const latestBlock = await provider.getBlockNumber();
+    const fromBlock = BlockRangeCalculator.calculate(latestBlock);
 
-    console.warn("Payment events from interact.js:", events);
+    // Use chunked requests to avoid timeouts
+    const chunks = BlockRangeCalculator.calculateChunks(fromBlock, latestBlock);
+    const allEvents = [];
 
-    const processedEvents = events.map((event) => ({
+    for (const chunk of chunks) {
+      try {
+        const events = await contract.queryFilter(
+          paymentFilter,
+          chunk.fromBlock,
+          chunk.toBlock
+        );
+        allEvents.push(...events);
+      } catch (chunkError) {
+        console.warn(`Failed to fetch payment chunk ${chunk.fromBlock}-${chunk.toBlock}:`, chunkError);
+        // Continue with other chunks even if one fails
+      }
+    }
+
+    const processedEvents = allEvents.map((event) => ({
       amount: ethers.formatEther(event.args.amount),
       sender: event.args.sender,
       recipient: event.args.recipient,
@@ -193,19 +290,43 @@ export async function fetchPaymentEvents(callback) {
     callback(processedEvents);
   } catch (error) {
     console.error("Error fetching payment events:", error);
+    callback([]);
   }
 }
 
 export const fetchPaymentEventsForWallet = async (walletAddress, callback) => {
-  const contract = await getContract();
   try {
+    const contract = await getContract();
+    const networkConfig = await getNetworkConfig();
+    const provider = new ethers.JsonRpcProvider(networkConfig.rpcUrl);
+    
     console.log(`Fetching payment events for wallet: ${walletAddress}`);
 
     const paymentFilter = contract.filters.PaymentEvent();
 
-    const events = await contract.queryFilter(paymentFilter, 0, "latest");
+    // Fetch the latest block number to set a more specific range
+    const latestBlock = await provider.getBlockNumber();
+    const fromBlock = BlockRangeCalculator.calculate(latestBlock);
 
-    const filteredEvents = events.filter(
+    // Use chunked requests to avoid timeouts
+    const chunks = BlockRangeCalculator.calculateChunks(fromBlock, latestBlock);
+    const allEvents = [];
+
+    for (const chunk of chunks) {
+      try {
+        const events = await contract.queryFilter(
+          paymentFilter,
+          chunk.fromBlock,
+          chunk.toBlock
+        );
+        allEvents.push(...events);
+      } catch (chunkError) {
+        console.warn(`Failed to fetch payment chunk ${chunk.fromBlock}-${chunk.toBlock}:`, chunkError);
+        // Continue with other chunks even if one fails
+      }
+    }
+
+    const filteredEvents = allEvents.filter(
       (event) =>
         event.args.sender.toLowerCase() === walletAddress.toLowerCase() ||
         event.args.recipient.toLowerCase() === walletAddress.toLowerCase()
@@ -294,16 +415,55 @@ export const withdrawFunds = async (toAddress, amount) => {
 };
 
 export const getWallet = async () => {
-  const contract = await getContract();
   try {
+    // Check if user is connected
+    if (!window.ethereum) {
+      console.warn("No wallet provider found");
+      return null;
+    }
+
+    console.log("Getting wallet info...");
+    const contract = await getContract();
+    
+    // Check if the contract exists and has the getWallet method
+    if (!contract || !contract.getWallet) {
+      console.error("Contract or getWallet method not found");
+      return null;
+    }
+
+    // Get the current account
+    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+    if (!accounts || accounts.length === 0) {
+      console.warn("No connected accounts found");
+      return null;
+    }
+
+    console.log("Calling contract.getWallet()...");
+    
+    // Try to check if the contract is deployed by calling a simple method first
+    try {
+      const owner = await contract.owner();
+      console.log("Contract owner:", owner);
+    } catch (ownerError) {
+      console.error("Failed to get contract owner - contract may not be deployed:", ownerError);
+      return null;
+    }
+
     const walletInfo = await contract.getWallet();
 
     const [walletAddress, currentBalance, numOfDonations] = walletInfo;
+
+    console.log("Wallet info received:", {
+      walletAddress,
+      currentBalance: currentBalance.toString(),
+      numOfDonations: numOfDonations.toString()
+    });
 
     if (
       !walletAddress ||
       walletAddress === "0x0000000000000000000000000000000000000000"
     ) {
+      console.warn("Wallet not created yet or returned zero address");
       return null;
     }
 
@@ -314,6 +474,14 @@ export const getWallet = async () => {
     };
   } catch (error) {
     console.error("Error fetching wallet info", error);
+    
+    // Check if it's a revert error
+    if (error.code === "CALL_EXCEPTION") {
+      console.warn("Contract call failed - wallet may not be created yet or contract method doesn't exist");
+      return null;
+    }
+    
+    // For other errors, also return null gracefully
     return null;
   }
 };

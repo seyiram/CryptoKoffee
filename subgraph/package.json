@@ -1,0 +1,22 @@
+{
+  "name": "cryptokoffee-subgraph",
+  "version": "1.0.0",
+  "description": "The Graph subgraph for CryptoKoffee donation tracking",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy:polygon": "graph deploy --studio cryptokoffee-polygon",
+    "deploy:arbitrum": "graph deploy --studio cryptokoffee-arbitrum",
+    "create-local": "graph create --node http://localhost:8020/ cryptokoffee",
+    "remove-local": "graph remove --node http://localhost:8020/ cryptokoffee",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 cryptokoffee"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.56.0",
+    "@graphprotocol/graph-ts": "^0.31.0"
+  },
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

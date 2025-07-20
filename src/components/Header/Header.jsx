@@ -1,28 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { FaSearch, FaBell } from "react-icons/fa";
 import "./Header.css";
 import {
-  initializeProvider,
   getWallet,
   createWallet,
   data,
 } from "../../utils/interact";
 import { toast } from "react-toastify";
+import { useWallet } from "../../contexts/WalletContext";
 
 const Header = () => {
-  const [account, setAccount] = useState(null);
+  const { account, isConnected, connectWallet, isConnecting } = useWallet();
   const [walletExists, setWalletExists] = useState(false);
   const [isCreatingWallet, setIsCreatingWallet] = useState(false);
 
-  useEffect(() => {
-    const storedAccount = localStorage.getItem("account");
-    if (storedAccount) {
-      setAccount(storedAccount);
-      initializeProvider().then(() => checkWalletExists(storedAccount));
-    }
-  }, []);
-
-  const checkWalletExists = async (account) => {
+  const checkWalletExists = useCallback(async (account) => {
     try {
       const walletInfo = await getWallet();
       if (
@@ -37,33 +29,19 @@ const Header = () => {
     } catch (error) {
       console.error("Error checking wallet existence", error);
     }
-  };
+  }, []);
 
-  const connectWallet = async () => {
-    if (window.ethereum) {
-      try {
-        const accounts = await window.ethereum.request({
-          method: "eth_requestAccounts",
-        });
-        const account = accounts[0];
-        setAccount(account);
-        localStorage.setItem("account", account);
-
-        // Initialize provider and signer
-        await initializeProvider();
-        await checkWalletExists(account);
-
-        // Refresh the page
-        window.location.reload();
-      } catch (error) {
-        console.error("Error connecting to MetaMask", error);
-      }
-    } else {
-      toast.error("Please install MetaMask");
+  useEffect(() => {
+    if (account) {
+      checkWalletExists(account);
     }
-  };
+  }, [account, checkWalletExists]);
 
-  const handleCreateWallet = async () => {
+  const handleConnectWallet = useCallback(async () => {
+    await connectWallet();
+  }, [connectWallet]);
+
+  const handleCreateWallet = useCallback(async () => {
     try {
       setIsCreatingWallet(true);
       const walletInfo = await getWallet();
@@ -93,9 +71,13 @@ const Header = () => {
     } finally {
       setIsCreatingWallet(false);
     }
-  };
+  }, []);
 
-  console.log("Wallet exists:", walletExists);
+  const buttonText = useMemo(() => {
+    if (isConnecting) return "Connecting...";
+    if (account) return `Connected: ${account.substring(0, 6)}...${account.substring(account.length - 4)}`;
+    return "Connect your wallet";
+  }, [isConnecting, account]);
 
   return (
     <header className="header">
@@ -124,12 +106,12 @@ const Header = () => {
       <div className="header-right">
         <FaBell className="header-icon" />
         <div className="header-button">
-          <button className="connect-button" onClick={connectWallet}>
-            {account
-              ? `Connected: ${account.substring(0, 6)}...${account.substring(
-                  account.length - 4
-                )}`
-              : "Connect your wallet"}
+          <button 
+            className="connect-button" 
+            onClick={handleConnectWallet}
+            disabled={isConnecting}
+          >
+            {buttonText}
           </button>
         </div>
       </div>
@@ -137,4 +119,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default React.memo(Header);

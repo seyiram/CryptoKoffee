@@ -1,5 +1,5 @@
 
-import { DynamoDBClient, GetItemCommand, QueryCommand, DeleteItemCommand } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, GetItemCommand, QueryCommand, DeleteItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 
 export const dynamodb = new DynamoDBClient({
@@ -27,7 +27,8 @@ export const getUserProfile = async (userId) => {
 
 
 export const getUserProfileByCustomUrl = async (customUrl) => {
-  const params = {
+  // Try the current format first (with leading slash)
+  let params = {
     TableName: "UserProfiles",
     IndexName: "CustomUrlIndex",
     KeyConditionExpression: "custom_url = :customUrl",
@@ -37,11 +38,44 @@ export const getUserProfileByCustomUrl = async (customUrl) => {
   };
 
   try {
-    const { Items } = await dynamodb.send(new QueryCommand(params));
+    let { Items } = await dynamodb.send(new QueryCommand(params));
+    
+    // If not found and customUrl starts with '/', try the old format (full URL)
+    if ((!Items || Items.length === 0) && customUrl.startsWith('/')) {
+      const username = customUrl.substring(1); // Remove leading slash
+      const oldFormatUrl = `cryptokoffee.com/donate/${username}`;
+      
+      params.ExpressionAttributeValues = marshall({
+        ":customUrl": oldFormatUrl
+      });
+      
+      const result = await dynamodb.send(new QueryCommand(params));
+      Items = result.Items;
+    }
+    
     return Items ? Items.map((item) => unmarshall(item))[0] : null;
   } catch (error) {
     console.error("Error fetching user profile by custom URL:", error);
     return null;
+  }
+};
+
+export const updateUserProfile = async (userId, profileData) => {
+  const params = {
+    TableName: "UserProfiles",
+    Item: marshall({
+      user_id: userId,
+      ...profileData,
+      updated_at: new Date().toISOString()
+    }),
+  };
+
+  try {
+    await dynamodb.send(new PutItemCommand(params));
+    return true;
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    return false;
   }
 };
 

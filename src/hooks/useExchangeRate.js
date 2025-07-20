@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useMemo, useCallback } from 'react';
 
 const fetchExchangeRate = async (chainId) => {
     let coinCode = "ETH";
@@ -6,7 +7,7 @@ const fetchExchangeRate = async (chainId) => {
     switch (Number(chainId)) {
       case 137: // Polygon Mainnet
       case 80001: // Polygon Mumbai Testnet
-      case 80002: // Polygon Testnet ( 80002 is a testnet)
+      case 80002: // Polygon Testnet
         coinCode = "POL";
         break;
       default:
@@ -29,7 +30,6 @@ const fetchExchangeRate = async (chainId) => {
     });
   
     const data = await response.json();
-    console.warn("Data here: ", data);
     const coin = data.find((coin) => coin.code === coinCode);
     if (coin) {
       return coin.rate;
@@ -39,14 +39,26 @@ const fetchExchangeRate = async (chainId) => {
   };
   
   const useExchangeRate = (chainId) => {
-    // Convert BigInt to string or number if necessary
-    const chainIdStr = typeof chainId === 'bigint' ? chainId.toString() : chainId;
-  
-    return useQuery({
+    // Convert BigInt to string or number if necessary - memoized to prevent recreation
+    const chainIdStr = useMemo(() => 
+      typeof chainId === 'bigint' ? chainId.toString() : chainId, 
+      [chainId]
+    );
+
+    const queryFn = useCallback(() => 
+      fetchExchangeRate(chainIdStr), 
+      [chainIdStr]
+    );
+
+    const queryOptions = useMemo(() => ({
       queryKey: ['exchangeRate', chainIdStr],
-      queryFn: () => fetchExchangeRate(chainIdStr),
+      queryFn,
       enabled: !!chainIdStr, // Only run the query if chainId is available
-    });
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+    }), [chainIdStr, queryFn]);
+  
+    return useQuery(queryOptions);
   };
   
   export default useExchangeRate;

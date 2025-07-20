@@ -24,10 +24,48 @@
   display: flex;
   align-items: center;
   text-decoration: none;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
+  border: none;
+  border-left: 4px solid transparent;
+  outline: none;
 }
 
-.sidebar-item:hover {
+.sidebar-item:focus {
+  outline: none;
+  border-left-color: #f79e61;
+}
+
+
+.sidebar-item.active {
+  background-color: #f79e61 !important;
+  color: #fff !important;
+  border-left: 4px solid #e67e22 !important;
+}
+
+.sidebar-item.active .sidebar-icon {
+  color: #fff !important;
+}
+
+/* Complete override of all link states */
+.sidebar-item:link,
+.sidebar-item:visited,
+.sidebar-item:hover,
+.sidebar-item:active {
+  color: #000;
+  text-decoration: none;
+  border-left-color: transparent;
+}
+
+.sidebar-item.active:link,
+.sidebar-item.active:visited,
+.sidebar-item.active:hover,
+.sidebar-item.active:active {
+  background-color: #f79e61 !important;
+  color: #fff !important;
+  border-left-color: #e67e22 !important;
+}
+
+.sidebar-item:hover:not(.active) {
   background-color: #97a0a4;
   color: #fff;
 }
@@ -81,10 +119,48 @@
   display: flex;
   align-items: center;
   text-decoration: none;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
+  border: none;
+  border-left: 4px solid transparent;
+  outline: none;
 }
 
-.mobile-menu-item:hover {
+.mobile-menu-item:focus {
+  outline: none;
+  border-left-color: #f79e61;
+}
+
+
+.mobile-menu-item.active {
+  background-color: #f79e61 !important;
+  color: #fff !important;
+  border-left: 4px solid #e67e22 !important;
+}
+
+.mobile-menu-item.active .mobile-menu-icon {
+  color: #fff !important;
+}
+
+/* Complete override of all link states */
+.mobile-menu-item:link,
+.mobile-menu-item:visited,
+.mobile-menu-item:hover,
+.mobile-menu-item:active {
+  color: #000;
+  text-decoration: none;
+  border-left-color: transparent;
+}
+
+.mobile-menu-item.active:link,
+.mobile-menu-item.active:visited,
+.mobile-menu-item.active:hover,
+.mobile-menu-item.active:active {
+  background-color: #f79e61 !important;
+  color: #fff !important;
+  border-left-color: #e67e22 !important;
+}
+
+.mobile-menu-item:hover:not(.active) {
   background-color: #97a0a4;
   color: #fff;
 }

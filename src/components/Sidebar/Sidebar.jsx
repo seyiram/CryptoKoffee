@@ -1,22 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { FaHome, FaHeart, FaCog, FaBars, FaUser, FaSignOutAlt } from "react-icons/fa";
 import { FaSackDollar } from "react-icons/fa6";
 import { BiSolidDonateHeart } from "react-icons/bi";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import Logo from "../../assets/cryptokoffee.png";
 import "./Sidebar.css";
 
 const Sidebar = () => {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!isMobileMenuOpen);
-  };
+  const toggleMobileMenu = useCallback(() => {
+    setMobileMenuOpen(prev => !prev);
+  }, []);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     localStorage.removeItem("account");
     window.location.reload();
-  };
+  }, []);
+
+  const menuItems = useMemo(() => [
+    { to: "/", icon: FaHome, text: "Dashboard" },
+    { to: "/donations", icon: FaHeart, text: "Transaction History" },
+    { to: "/withdraw", icon: FaSackDollar, text: "Withdraw" },
+    { to: "/profile-setup", icon: BiSolidDonateHeart, text: "Profile Setup" },
+    { to: "/profile", icon: FaUser, text: "Profile" },
+    { to: "/settings", icon: FaCog, text: "Account Settings" },
+  ], []);
 
   return (
     <>
@@ -25,30 +34,16 @@ const Sidebar = () => {
           <img src={Logo} alt="Logo" />
         </div>
         <div className="sidebar-menu">
-          <Link to="/" className="sidebar-item">
-            <FaHome className="sidebar-icon" />
-            <span>Dashboard</span>
-          </Link>
-          <Link to="/donations" className="sidebar-item">
-            <FaHeart className="sidebar-icon" />
-            <span>Donations</span>
-          </Link>
-          <Link to="/withdraw" className="sidebar-item">
-            <FaSackDollar className="sidebar-icon" />
-            <span>Withdraw</span>
-          </Link>
-          <Link to="/donation-page" className="sidebar-item">
-            <BiSolidDonateHeart className="sidebar-icon" />
-            <span>Donation Page</span>
-          </Link>
-          <Link to="/profile" className="sidebar-item">
-            <FaUser className="sidebar-icon" />
-            <span>Profile</span>
-          </Link>
-          <Link to="/settings" className="sidebar-item">
-            <FaCog className="sidebar-icon" />
-            <span>Account Settings</span>
-          </Link>
+          {menuItems.map(({ to, icon: Icon, text }) => (
+            <NavLink 
+              key={to} 
+              to={to} 
+              className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
+            >
+              <Icon className="sidebar-icon" />
+              <span>{text}</span>
+            </NavLink>
+          ))}
           <span className="sidebar-item" onClick={handleLogout} tabIndex={0}>
             <FaSignOutAlt className="sidebar-icon" />
             <span>Logout</span>
@@ -67,30 +62,17 @@ const Sidebar = () => {
 
       {isMobileMenuOpen && (
         <div className="mobile-menu">
-          <Link to="/" className="mobile-menu-item" onClick={toggleMobileMenu}>
-            <FaHome className="mobile-menu-icon" />
-            <span>Dashboard</span>
-          </Link>
-          <Link to="/donations" className="mobile-menu-item" onClick={toggleMobileMenu}>
-            <FaHeart className="mobile-menu-icon" />
-            <span>Donations</span>
-          </Link>
-          <Link to="/withdraw" className="mobile-menu-item" onClick={toggleMobileMenu}>
-            <FaSackDollar className="mobile-menu-icon" />
-            <span>Withdraw</span>
-          </Link>
-          <Link to="/donation-page" className="mobile-menu-item" onClick={toggleMobileMenu}>
-            <BiSolidDonateHeart className="mobile-menu-icon" />
-            <span>Donation Page</span>
-          </Link>
-          <Link to="/profile" className="mobile-menu-item" onClick={toggleMobileMenu}>
-            <FaUser className="mobile-menu-icon" />
-            <span>Profile</span>
-          </Link>
-          <Link to="/settings" className="mobile-menu-item" onClick={toggleMobileMenu}>
-            <FaCog className="mobile-menu-icon" />
-            <span>Account Settings</span>
-          </Link>
+          {menuItems.map(({ to, icon: Icon, text }) => (
+            <NavLink 
+              key={to} 
+              to={to} 
+              className={({ isActive }) => `mobile-menu-item ${isActive ? 'active' : ''}`}
+              onClick={toggleMobileMenu}
+            >
+              <Icon className="mobile-menu-icon" />
+              <span>{text}</span>
+            </NavLink>
+          ))}
           <div className="mobile-menu-item" onClick={handleLogout}>
             <FaSignOutAlt className="mobile-menu-icon" />
             <span>Logout</span>
@@ -101,4 +83,4 @@ const Sidebar = () => {
   );
 };
 
-export default Sidebar;
+export default React.memo(Sidebar);
