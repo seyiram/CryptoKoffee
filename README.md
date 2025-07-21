@@ -1,85 +1,91 @@
-CryptoKoffee
+# CryptoKoffee ☕️
 
 CryptoKoffee is an easy way for people to support their favorite creators with cryptocurrency. Creators can accept donations from their supporters in a seamless and secure manner.
-Table of Contents
 
-    Features
-    Getting Started
-    Installation
-    Usage
-    Contributing
-    License
-    Contact
+## Table of Contents
 
-Features
+- [Features](#features)
+- [Getting Started](#getting-started)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
 
-    Easy Donations: Supporters can donate to their favorite creators using various cryptocurrencies.
-    Secure Transactions: All transactions are secured through blockchain technology.
-    Creator Dashboard: Creators can manage their profiles and view donation history.
-    Responsive Design: Optimized for both desktop and mobile devices.
+## Features
 
-Getting Started
+- **Easy Donations**: Supporters can donate to their favorite creators using various cryptocurrencies.
+- **Secure Transactions**: All transactions are secured through blockchain technology.
+- **Creator Dashboard**: Creators can manage their profiles and view donation history.
+- **Responsive Design**: Optimized for both desktop and mobile devices.
+
+## Getting Started
 
 Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
-Prerequisites
 
-    Node.js and npm installed
-    Solidity compiler (solc)
+### Prerequisites
 
-Installation
+- Node.js and npm installed
+- Solidity compiler (solc)
 
-    Clone the repository:
+## Installation
 
-    bash
+1. Clone the repository:
 
-git clone https://github.com/yourusername/cryptokoffee.git
+```bash
+git clone https://github.com/seyiram/CryptoKoffee.git
+```
 
-Navigate to the project directory:
+2. Navigate to the project directory:
 
-bash
+```bash
+cd CryptoKoffee
+```
 
-cd cryptokoffee
+3. Install dependencies:
 
-Install dependencies:
+```bash
+npm install
+```
 
-bash
+## Usage
 
-    npm install
-
-Usage
 Start the development server:
 
-bash
-
+```bash
 npm run dev
+```
 
-For Supporters
+### For Supporters
 
-    Connect Wallet: Click on the "Connect Wallet" button and connect your MetaMask wallet.
-    Select Creator: Browse and select the creator you want to support.
-    Send Donation: Enter the amount and click "Send Donation." Confirm the transaction in your MetaMask wallet.
+1. **Connect Wallet**: Click on the "Connect Wallet" button and connect your MetaMask wallet.
+2. **Select Creator**: Browse and select the creator you want to support.
+3. **Send Donation**: Enter the amount and click "Send Donation." Confirm the transaction in your MetaMask wallet.
 
-For Creators
+### For Creators
 
-    Create Profile: Sign up and create your profile, adding details about your work.
-    Share Link: Share your CryptoKoffee profile link with your supporters.
-    Receive Donations: Receive crypto donations directly to your wallet.
+1. **Create Profile**: Sign up and create your profile, adding details about your work.
+2. **Share Link**: Share your CryptoKoffee profile link with your supporters.
+3. **Receive Donations**: Receive crypto donations directly to your wallet.
 
-Contributing
+## Contributing
 
-We welcome contributions from the community! Here’s how you can help:
+We welcome contributions from the community! Here's how you can help:
 
-    Fork the repository.
-    Create a new branch (git checkout -b feature/your-feature).
-    Commit your changes (git commit -m 'Add some feature').
-    Push to the branch (git push origin feature/your-feature).
-    Open a pull request.
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/your-feature`).
+3. Commit your changes (`git commit -m 'Add some feature'`).
+4. Push to the branch (`git push origin feature/your-feature`).
+5. Open a pull request.
 
-License
+## License
 
-This project is licensed under the MIT License. See the LICENSE file for more details.
-Contact
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+
+## Contact
 
 For any questions or feedback, please contact us at support@cryptokoffee.com.
+
+---
 
 Thank you for using CryptoKoffee! ☕️🚀
