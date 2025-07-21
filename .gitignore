@@ -28,3 +28,6 @@ dist-ssr
 .env.local
 
 .claude
+
+# Private documentation
+DONATION_TRACKING_SETUP.md
