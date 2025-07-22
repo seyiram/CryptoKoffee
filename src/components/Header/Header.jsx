@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { FaSearch, FaBell } from "react-icons/fa";
+import { FaBell } from "react-icons/fa";
 import "./Header.css";
 import {
   getWallet,
@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { useWallet } from "../../contexts/WalletContext";
 
 const Header = () => {
-  const { account, isConnected, connectWallet, isConnecting } = useWallet();
+  const { account, isConnected, connectWallet, isConnecting, network } = useWallet();
   const [walletExists, setWalletExists] = useState(false);
   const [isCreatingWallet, setIsCreatingWallet] = useState(false);
 
@@ -73,18 +73,33 @@ const Header = () => {
     }
   }, []);
 
+  const getNetworkDisplayName = (network) => {
+    if (!network) return "";
+    
+    const networkNames = {
+      "Polygon Amoy": "Polygon",
+      "Arbitrum Sepolia": "Arbitrum", 
+      "arbitrum-sepolia": "Arbitrum",
+      "polygon": "Polygon",
+      "ethereum": "Ethereum",
+      "mainnet": "Ethereum"
+    };
+    
+    return networkNames[network.name] || network.name;
+  };
+
   const buttonText = useMemo(() => {
     if (isConnecting) return "Connecting...";
-    if (account) return `Connected: ${account.substring(0, 6)}...${account.substring(account.length - 4)}`;
+    if (account) {
+      const networkName = getNetworkDisplayName(network);
+      const shortAddress = `${account.substring(0, 6)}...${account.substring(account.length - 4)}`;
+      return networkName ? `${networkName} • ${shortAddress}` : shortAddress;
+    }
     return "Connect your wallet";
-  }, [isConnecting, account]);
+  }, [isConnecting, account, network]);
 
   return (
     <header className="header">
-      <div className="header-search">
-        <FaSearch className="header-icon" />
-        <input type="text" placeholder="Type to search..." />
-      </div>
       <div className="create-wallet-container">
         {account && !walletExists && (
           <button

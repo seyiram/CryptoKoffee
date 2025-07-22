@@ -8,18 +8,6 @@
   z-index: 1;
 }
 
-.header-search {
-  display: flex;
-  align-items: center;
-  background-color: #fff;
-  padding: 1.313rem 1rem;
-}
-
-.header-search input {
-  border: none;
-  outline: none;
-  margin-left: 10px;
-}
 
 .header-icon {
   color: #7f8c8d;
